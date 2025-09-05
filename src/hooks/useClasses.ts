@@ -30,7 +30,7 @@ export function useClasses(teacherId: string | null) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [teacherId]);
 
   // Create a new class
   const createClass = async (name: string) => {

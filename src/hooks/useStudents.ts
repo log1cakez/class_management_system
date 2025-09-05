@@ -47,7 +47,7 @@ export function useStudents(classId: string | null, teacherId: string | null) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [classId, teacherId])
 
   const addPointsToStudents = async (studentIds: string[], pointsToAdd: number, reason: string, behavior?: string) => {
     if (!teacherId) throw new Error('Teacher ID is required')
