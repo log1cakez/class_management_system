@@ -4,8 +4,6 @@ interface Behavior {
   id: string;
   name: string;
   teacherId: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export function useBehaviors(teacherId: string | null) {
@@ -13,7 +11,6 @@ export function useBehaviors(teacherId: string | null) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch behaviors for a teacher
   const fetchBehaviors = useCallback(async () => {
     if (!teacherId) return;
     
@@ -34,7 +31,6 @@ export function useBehaviors(teacherId: string | null) {
     }
   }, [teacherId]);
 
-  // Create a new behavior
   const createBehavior = async (name: string) => {
     if (!teacherId) throw new Error("No teacher ID");
     
@@ -62,17 +58,17 @@ export function useBehaviors(teacherId: string | null) {
     }
   };
 
-  // Update a behavior
   const updateBehavior = async (id: string, name: string) => {
     if (!teacherId) throw new Error("No teacher ID");
     
     try {
-      const response = await fetch(`/api/behaviors?id=${id}`, {
+      const response = await fetch("/api/behaviors", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          id,
           name,
           teacherId,
         }),
@@ -92,10 +88,7 @@ export function useBehaviors(teacherId: string | null) {
     }
   };
 
-  // Delete a behavior
   const deleteBehavior = async (id: string) => {
-    if (!teacherId) throw new Error("No teacher ID");
-    
     try {
       const response = await fetch(`/api/behaviors?id=${id}&teacherId=${teacherId}`, {
         method: "DELETE",
@@ -111,7 +104,6 @@ export function useBehaviors(teacherId: string | null) {
     }
   };
 
-  // Fetch behaviors when teacherId changes
   useEffect(() => {
     fetchBehaviors();
   }, [fetchBehaviors]);

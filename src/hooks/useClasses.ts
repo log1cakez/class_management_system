@@ -11,7 +11,6 @@ export function useClasses(teacherId: string | null) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch classes for a teacher
   const fetchClasses = useCallback(async () => {
     if (!teacherId) return;
     
@@ -32,7 +31,6 @@ export function useClasses(teacherId: string | null) {
     }
   }, [teacherId]);
 
-  // Create a new class
   const createClass = async (name: string) => {
     if (!teacherId) throw new Error("No teacher ID");
     
@@ -59,7 +57,6 @@ export function useClasses(teacherId: string | null) {
     }
   };
 
-  // Delete a class
   const deleteClass = async (classId: string) => {
     try {
       const response = await fetch(`/api/classes/${classId}?teacherId=${teacherId}`, {
@@ -76,7 +73,6 @@ export function useClasses(teacherId: string | null) {
     }
   };
 
-  // Fetch classes when teacherId changes
   useEffect(() => {
     fetchClasses();
   }, [fetchClasses]);

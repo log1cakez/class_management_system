@@ -8,18 +8,6 @@ export interface Student {
   points: number
   classId: string
   isSelected?: boolean
-  createdAt: string
-  updatedAt: string
-}
-
-export interface Class {
-  id: string
-  name: string
-  description: string | null
-  teacherId: string
-  students: Student[]
-  createdAt: string
-  updatedAt: string
 }
 
 export function useStudents(classId: string | null, teacherId: string | null) {
@@ -110,7 +98,6 @@ export function useStudents(classId: string | null, teacherId: string | null) {
         body: JSON.stringify({
           name,
           classId,
-          points: 0,
           teacherId
         })
       })
@@ -120,8 +107,7 @@ export function useStudents(classId: string | null, teacherId: string | null) {
       }
 
       const newStudent = await response.json()
-      setStudents(prevStudents => [...prevStudents, { ...newStudent, isSelected: false }])
-      
+      setStudents(prev => [...prev, { ...newStudent, isSelected: false }])
       return newStudent
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
@@ -137,9 +123,9 @@ export function useStudents(classId: string | null, teacherId: string | null) {
     students,
     loading,
     error,
-    fetchStudents,
     addPointsToStudents,
     toggleStudentSelection,
-    createStudent
+    createStudent,
+    refetch: fetchStudents,
   }
 }
