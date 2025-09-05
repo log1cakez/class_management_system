@@ -32,7 +32,7 @@ export function useBehaviors(teacherId: string | null) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [teacherId]);
 
   // Create a new behavior
   const createBehavior = async (name: string) => {
