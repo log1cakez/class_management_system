@@ -2,12 +2,13 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 // DELETE /api/classes/[id] - Delete a specific class
+// Updated for Next.js 15 compatibility with async params
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params
+    const { id } = await context.params
     const { searchParams } = new URL(request.url)
     const teacherId = searchParams.get('teacherId')
 
