@@ -129,7 +129,7 @@ export async function PUT(request: NextRequest) {
           studentId,
           points: pointsToAdd,
           reason: reason || 'Points added',
-          behavior: behavior || null
+          behaviorName: behavior || null
         }
       })
     )

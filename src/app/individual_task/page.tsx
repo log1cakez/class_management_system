@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Image from "next/image";
 import { DUCK_ICONS, IMAGES } from "@/assets/images/config";
 import NavigationButtons from "@/components/NavigationButtons";
@@ -9,7 +9,7 @@ import ComplimentModal from "@/components/ComplimentModal";
 import { useStudents } from "@/hooks/useStudents";
 import { useSearchParams } from "next/navigation";
 
-export default function IndividualTaskPage() {
+function IndividualTaskContent() {
   const searchParams = useSearchParams();
   const classId = searchParams.get("classId");
   const teacherId = searchParams.get("teacherId");
@@ -246,5 +246,22 @@ export default function IndividualTaskPage() {
         />
       )}
     </main>
+  );
+}
+
+export default function IndividualTaskPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-lg text-gray-600">Loading task page...</p>
+          </div>
+        </div>
+      }
+    >
+      <IndividualTaskContent />
+    </Suspense>
   );
 }

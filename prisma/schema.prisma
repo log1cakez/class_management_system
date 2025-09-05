@@ -70,14 +70,14 @@ model Student {
 }
 
 model Point {
-    id         String   @id @default(cuid())
-    studentId  String
-    behaviorId String?
-    points     Int
-    reason     String
-    behavior   String?
-    createdAt  DateTime @default(now())
-    updatedAt  DateTime @updatedAt
+    id           String   @id @default(cuid())
+    studentId    String
+    behaviorId   String?
+    points       Int
+    reason       String
+    behaviorName String?
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
 
     // Relations
     student  Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
