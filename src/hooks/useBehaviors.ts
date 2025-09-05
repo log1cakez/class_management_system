@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface Behavior {
   id: string;
@@ -14,7 +14,7 @@ export function useBehaviors(teacherId: string | null) {
   const [error, setError] = useState<string | null>(null);
 
   // Fetch behaviors for a teacher
-  const fetchBehaviors = async () => {
+  const fetchBehaviors = useCallback(async () => {
     if (!teacherId) return;
     
     setLoading(true);
@@ -114,7 +114,7 @@ export function useBehaviors(teacherId: string | null) {
   // Fetch behaviors when teacherId changes
   useEffect(() => {
     fetchBehaviors();
-  }, [teacherId]);
+  }, [fetchBehaviors]);
 
   return {
     behaviors,

@@ -4,10 +4,10 @@ import { prisma } from '@/lib/prisma'
 // DELETE /api/classes/[id] - Delete a specific class
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     const { searchParams } = new URL(request.url)
     const teacherId = searchParams.get('teacherId')
 

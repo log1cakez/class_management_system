@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface Class {
   id: string;
@@ -12,7 +12,7 @@ export function useClasses(teacherId: string | null) {
   const [error, setError] = useState<string | null>(null);
 
   // Fetch classes for a teacher
-  const fetchClasses = async () => {
+  const fetchClasses = useCallback(async () => {
     if (!teacherId) return;
     
     setLoading(true);
@@ -79,7 +79,7 @@ export function useClasses(teacherId: string | null) {
   // Fetch classes when teacherId changes
   useEffect(() => {
     fetchClasses();
-  }, [teacherId]);
+  }, [fetchClasses]);
 
   return {
     classes,

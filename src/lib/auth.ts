@@ -18,7 +18,7 @@ export function getAuthenticatedUser(request: NextRequest): AuthenticatedUser | 
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as AuthenticatedUser
     
     return decoded
-  } catch (error) {
+  } catch {
     return null
   }
 }

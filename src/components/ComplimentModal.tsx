@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
-import { IMAGES } from "@/assets/images/config";
 
 interface ComplimentModalProps {
   isOpen: boolean;

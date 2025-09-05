@@ -23,13 +23,10 @@ export default function BehaviorSelectionModal({
   isOpen,
   onClose,
   onConfirm,
-  selectedStudents,
   teacherId,
 }: BehaviorSelectionModalProps) {
   const {
     behaviors: dbBehaviors,
-    loading,
-    error,
     createBehavior,
     updateBehavior,
     deleteBehavior,

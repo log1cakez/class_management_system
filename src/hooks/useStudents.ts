@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 export interface Student {
   id: string
@@ -27,7 +27,7 @@ export function useStudents(classId: string | null, teacherId: string | null) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchStudents = async () => {
+  const fetchStudents = useCallback(async () => {
     if (!classId || !teacherId) return
 
     setLoading(true)
@@ -131,7 +131,7 @@ export function useStudents(classId: string | null, teacherId: string | null) {
 
   useEffect(() => {
     fetchStudents()
-  }, [classId, teacherId])
+  }, [fetchStudents])
 
   return {
     students,
