@@ -10,6 +10,20 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+model Behavior {
+    id        String   @id @default(cuid())
+    name      String
+    teacherId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    points  Point[]
+
+    @@map("behaviors")
+}
+
 model Teacher {
     id        String   @id @default(cuid())
     email     String   @unique
@@ -19,7 +33,8 @@ model Teacher {
     updatedAt DateTime @updatedAt
 
     // Relations
-    classes Class[]
+    classes   Class[]
+    behaviors Behavior[]
 
     @@map("teachers")
 }
@@ -55,16 +70,18 @@ model Student {
 }
 
 model Point {
-    id        String   @id @default(cuid())
-    studentId String
-    points    Int
-    reason    String
-    behavior  String?
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id         String   @id @default(cuid())
+    studentId  String
+    behaviorId String?
+    points     Int
+    reason     String
+    behavior   String?
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
 
     // Relations
-    student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+    student  Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+    behavior Behavior? @relation(fields: [behaviorId], references: [id], onDelete: SetNull)
 
     @@map("points")
 }

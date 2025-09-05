@@ -5,15 +5,9 @@ import Image from "next/image";
 import { DUCK_ICONS, IMAGES } from "@/assets/images/config";
 import NavigationButtons from "@/components/NavigationButtons";
 import BehaviorSelectionModal from "@/components/BehaviorSelectionModal";
+import ComplimentModal from "@/components/ComplimentModal";
 import { useStudents } from "@/hooks/useStudents";
 import { useSearchParams } from "next/navigation";
-
-interface Student {
-  id: string;
-  name: string;
-  points: number;
-  isSelected: boolean;
-}
 
 export default function IndividualTaskPage() {
   const searchParams = useSearchParams();
@@ -29,6 +23,12 @@ export default function IndividualTaskPage() {
   } = useStudents(classId, teacherId);
 
   const [isBehaviorModalOpen, setIsBehaviorModalOpen] = useState(false);
+  const [isComplimentModalOpen, setIsComplimentModalOpen] = useState(false);
+  const [complimentData, setComplimentData] = useState<{
+    selectedStudents: Array<{ id: string; name: string }>;
+    selectedBehaviors: Array<{ id: string; name: string }>;
+    pointsAwarded: number;
+  } | null>(null);
 
   const handleNextClick = () => {
     const selectedStudents = students.filter((student) => student.isSelected);
@@ -39,19 +39,34 @@ export default function IndividualTaskPage() {
     setIsBehaviorModalOpen(true);
   };
 
-  const handleBehaviorConfirm = async (selectedBehaviors: string[]) => {
+  const handleBehaviorConfirm = async (
+    selectedBehaviors: Array<{ id: string; name: string }>
+  ) => {
     const pointsToAdd = selectedBehaviors.length;
     const selectedStudentIds = students
       .filter((student) => student.isSelected)
       .map((student) => student.id);
+
+    // Get selected students data
+    const selectedStudentsData = students
+      .filter((student) => student.isSelected)
+      .map((student) => ({ id: student.id, name: student.name }));
 
     try {
       await addPointsToStudents(
         selectedStudentIds,
         pointsToAdd,
         "Behavior points",
-        selectedBehaviors.join(", ")
+        selectedBehaviors.map((b) => b.name).join(", ")
       );
+
+      // Show compliment modal
+      setComplimentData({
+        selectedStudents: selectedStudentsData,
+        selectedBehaviors: selectedBehaviors,
+        pointsAwarded: pointsToAdd,
+      });
+      setIsComplimentModalOpen(true);
     } catch (error) {
       console.error("Error adding points:", error);
       alert("Failed to add points. Please try again.");
@@ -95,6 +110,16 @@ export default function IndividualTaskPage() {
             worksButtonSize={80}
             gap="gap-2"
             onWorksClick={() => {}}
+            homeUrl={
+              teacherId
+                ? `/teacher-dashboard?teacherId=${teacherId}`
+                : "/teacher-dashboard"
+            }
+            backUrl={
+              classId && teacherId
+                ? `/dashboard?classId=${classId}&teacherId=${teacherId}`
+                : "/dashboard"
+            }
           />
         </div>
 
@@ -204,7 +229,22 @@ export default function IndividualTaskPage() {
         onClose={() => setIsBehaviorModalOpen(false)}
         onConfirm={handleBehaviorConfirm}
         selectedStudents={students.filter((s) => s.isSelected).map((s) => s.id)}
+        teacherId={teacherId}
       />
+
+      {/* Compliment Modal */}
+      {complimentData && (
+        <ComplimentModal
+          isOpen={isComplimentModalOpen}
+          onClose={() => {
+            setIsComplimentModalOpen(false);
+            setComplimentData(null);
+          }}
+          selectedStudents={complimentData.selectedStudents}
+          selectedBehaviors={complimentData.selectedBehaviors}
+          pointsAwarded={complimentData.pointsAwarded}
+        />
+      )}
     </main>
   );
 }

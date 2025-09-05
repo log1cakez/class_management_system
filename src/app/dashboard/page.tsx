@@ -90,6 +90,11 @@ export default function DashboardPage() {
                 ? `/teacher-dashboard?teacherId=${teacherId}`
                 : "/teacher-dashboard"
             }
+            backUrl={
+              teacherId
+                ? `/teacher-dashboard?teacherId=${teacherId}`
+                : "/teacher-dashboard"
+            }
           />
         </div>
 
