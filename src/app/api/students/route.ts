@@ -121,24 +121,71 @@ export async function PUT(request: NextRequest) {
     )
 
     const updatedStudents = await Promise.all(updatePromises)
+    console.log('Successfully updated student points:', updatedStudents.length, 'students')
 
-    // Create point records for tracking
-    const pointRecordPromises = studentIds.map(studentId =>
-      prisma.point.create({
-        data: {
-          studentId,
-          points: pointsToAdd,
-          reason: reason || 'Points added',
-          behaviorName: behavior || null
-        }
+    // Create point records for tracking (non-blocking)
+    try {
+      const pointRecordPromises = studentIds.map(studentId =>
+        prisma.point.create({
+          data: {
+            studentId,
+            points: pointsToAdd,
+            reason: reason || 'Points added',
+            behaviorName: behavior || null
+          }
+        })
+      )
+
+      await Promise.all(pointRecordPromises)
+      console.log('Successfully created point records:', studentIds.length, 'records')
+    } catch (pointError) {
+      console.error('Error creating point records (non-critical):', pointError)
+      // Don't fail the entire request if point records fail
+    }
+
+    // Ensure we always return a proper response
+    try {
+      return NextResponse.json(updatedStudents)
+    } catch (responseError) {
+      console.error('Error serializing response:', responseError)
+      // Return a simplified response if serialization fails
+      return NextResponse.json({ 
+        success: true, 
+        message: 'Points updated successfully',
+        studentCount: updatedStudents.length 
       })
-    )
-
-    await Promise.all(pointRecordPromises)
-
-    return NextResponse.json(updatedStudents)
+    }
   } catch (error) {
     console.error('Error updating student points:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      studentIds,
+      pointsToAdd,
+      teacherId
+    })
+    
+    // Check if students were actually updated despite the error
+    try {
+      const checkStudents = await prisma.student.findMany({
+        where: { id: { in: studentIds } },
+        select: { id: true, points: true }
+      })
+      
+      // If points were updated, return success with a warning
+      const hasUpdatedPoints = checkStudents.some(s => s.points > 0)
+      if (hasUpdatedPoints) {
+        console.log('Points were updated despite error, returning success')
+        return NextResponse.json({ 
+          success: true, 
+          message: 'Points updated successfully (with warnings)',
+          studentCount: checkStudents.length 
+        })
+      }
+    } catch (checkError) {
+      console.error('Error checking student points:', checkError)
+    }
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

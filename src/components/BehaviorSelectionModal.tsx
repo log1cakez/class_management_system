@@ -8,6 +8,8 @@ import { useBehaviors } from "@/hooks/useBehaviors";
 interface Behavior {
   id: string;
   name: string;
+  teacherId: string;
+  isDefault?: boolean;
   isSelected: boolean;
 }
 
@@ -40,29 +42,10 @@ export default function BehaviorSelectionModal({
 
   // Update behaviors when database behaviors change
   useEffect(() => {
-    if (dbBehaviors.length > 0) {
-      setBehaviors(
-        dbBehaviors.map((behavior) => ({ ...behavior, isSelected: false }))
-      );
-    } else {
-      // Fallback to default behaviors if no custom behaviors exist
-      const defaultBehaviors = [
-        { id: "participate", name: "Participate" },
-        { id: "following-instruction", name: "Following instruction" },
-        { id: "sitting-properly", name: "Sitting properly" },
-        { id: "finish-task-on-time", name: "Finish task on time" },
-        { id: "listening-attentively", name: "Listening attentively" },
-        {
-          id: "stays-in-designated-place",
-          name: "Stays in the designated place",
-        },
-        { id: "working-cooperatively", name: "Working cooperatively" },
-        { id: "working-quietly", name: "Working quietly" },
-      ];
-      setBehaviors(
-        defaultBehaviors.map((behavior) => ({ ...behavior, isSelected: false }))
-      );
-    }
+    // Always use database behaviors (which include defaults from the API)
+    setBehaviors(
+      dbBehaviors.map((behavior) => ({ ...behavior, isSelected: false }))
+    );
   }, [dbBehaviors]);
 
   const toggleBehavior = (id: string) => {
@@ -83,7 +66,11 @@ export default function BehaviorSelectionModal({
         setShowAddForm(false);
       } catch (error) {
         console.error("Error adding behavior:", error);
-        alert("Failed to add behavior. Please try again.");
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to add behavior. Please try again.";
+        alert(`Error: ${errorMessage}`);
       }
     }
   };
@@ -96,7 +83,11 @@ export default function BehaviorSelectionModal({
         setShowEditForm(null);
       } catch (error) {
         console.error("Error updating behavior:", error);
-        alert("Failed to update behavior. Please try again.");
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to update behavior. Please try again.";
+        alert(`Error: ${errorMessage}`);
       }
     }
   };
@@ -107,7 +98,11 @@ export default function BehaviorSelectionModal({
         await deleteBehavior(id);
       } catch (error) {
         console.error("Error deleting behavior:", error);
-        alert("Failed to delete behavior. Please try again.");
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : "Failed to delete behavior. Please try again.";
+        alert(`Error: ${errorMessage}`);
       }
     }
   };
@@ -177,7 +172,7 @@ export default function BehaviorSelectionModal({
                     value={newBehaviorName}
                     onChange={(e) => setNewBehaviorName(e.target.value)}
                     placeholder="Enter behavior name..."
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    className="flex-1 px-4 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
                     onKeyPress={(e) => e.key === "Enter" && handleAddBehavior()}
                   />
                   <button
@@ -212,7 +207,7 @@ export default function BehaviorSelectionModal({
                           type="text"
                           value={editBehaviorName}
                           onChange={(e) => setEditBehaviorName(e.target.value)}
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="flex-1 px-3 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                           onKeyPress={(e) =>
                             e.key === "Enter" && handleEditBehavior(behavior.id)
                           }
@@ -262,6 +257,15 @@ export default function BehaviorSelectionModal({
                             >
                               🗑️
                             </button>
+                          </div>
+                        )}
+
+                        {/* Default behavior indicator */}
+                        {behavior.isDefault && (
+                          <div className="flex items-center gap-1">
+                            <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">
+                              Default
+                            </span>
                           </div>
                         )}
                       </>

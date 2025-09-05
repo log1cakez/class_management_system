@@ -56,21 +56,37 @@ export function useStudents(classId: string | null, teacherId: string | null) {
       })
 
       if (!response.ok) {
-        throw new Error('Failed to update student points')
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || 'Failed to update student points')
       }
 
-      const updatedStudents = await response.json()
+      const responseData = await response.json()
       
-      // Update local state
-      setStudents(prevStudents => 
-        prevStudents.map(student => {
-          const updatedStudent = updatedStudents.find((s: Student) => s.id === student.id)
-          return updatedStudent ? { ...updatedStudent, isSelected: false } : student
-        })
-      )
+      // Handle different response formats
+      if (responseData.success) {
+        // New format with success flag
+        console.log('Points updated successfully:', responseData.message)
+        // Refresh student data to get updated points
+        await fetchStudents()
+        return responseData
+      } else if (Array.isArray(responseData)) {
+        // Original format with student array
+        const updatedStudents = responseData
+        
+        // Update local state
+        setStudents(prevStudents => 
+          prevStudents.map(student => {
+            const updatedStudent = updatedStudents.find((s: Student) => s.id === student.id)
+            return updatedStudent ? { ...updatedStudent, isSelected: false } : student
+          })
+        )
 
-      return updatedStudents
+        return updatedStudents
+      } else {
+        throw new Error('Unexpected response format')
+      }
     } catch (err) {
+      console.error('Error in addPointsToStudents:', err)
       setError(err instanceof Error ? err.message : 'An error occurred')
       throw err
     }

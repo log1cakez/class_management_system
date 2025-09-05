@@ -69,7 +69,29 @@ function IndividualTaskContent() {
       setIsComplimentModalOpen(true);
     } catch (error) {
       console.error("Error adding points:", error);
-      alert("Failed to add points. Please try again.");
+
+      // Show a more user-friendly error message
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to add points. Please try again.";
+
+      // Check if this might be a false error (points were actually added)
+      if (errorMessage.includes("Failed to update student points")) {
+        // Give user option to check if points were added
+        const shouldCheck = confirm(
+          `Error: ${errorMessage}\n\n` +
+            `This might be a temporary issue. Would you like to check if the points were actually added?\n\n` +
+            `Click "OK" to refresh the page and check, or "Cancel" to try again.`
+        );
+
+        if (shouldCheck) {
+          window.location.reload();
+          return;
+        }
+      }
+
+      alert(`Error: ${errorMessage}`);
     }
   };
 

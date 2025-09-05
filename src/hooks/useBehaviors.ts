@@ -4,6 +4,7 @@ interface Behavior {
   id: string;
   name: string;
   teacherId: string;
+  isDefault?: boolean;
 }
 
 export function useBehaviors(teacherId: string | null) {
@@ -47,11 +48,13 @@ export function useBehaviors(teacherId: string | null) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create behavior");
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || "Failed to create behavior");
       }
 
       const newBehavior = await response.json();
-      setBehaviors((prev) => [...prev, newBehavior]);
+      // Refresh the full behavior list to ensure we have both defaults and customs
+      await fetchBehaviors();
       return newBehavior;
     } catch (err) {
       throw err;
@@ -75,13 +78,13 @@ export function useBehaviors(teacherId: string | null) {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update behavior");
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || "Failed to update behavior");
       }
 
       const updatedBehavior = await response.json();
-      setBehaviors((prev) => 
-        prev.map((b) => (b.id === id ? updatedBehavior : b))
-      );
+      // Refresh the full behavior list to ensure we have both defaults and customs
+      await fetchBehaviors();
       return updatedBehavior;
     } catch (err) {
       throw err;
@@ -90,15 +93,24 @@ export function useBehaviors(teacherId: string | null) {
 
   const deleteBehavior = async (id: string) => {
     try {
-      const response = await fetch(`/api/behaviors?id=${id}&teacherId=${teacherId}`, {
+      const response = await fetch("/api/behaviors", {
         method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+          teacherId,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to delete behavior");
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
+        throw new Error(errorData.error || "Failed to delete behavior");
       }
 
-      setBehaviors((prev) => prev.filter((b) => b.id !== id));
+      // Refresh the full behavior list to ensure we have both defaults and customs
+      await fetchBehaviors();
     } catch (err) {
       throw err;
     }
