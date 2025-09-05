@@ -36,7 +36,7 @@ export default function HomePage() {
 
         {/* Start Button */}
         <div className="mb-8">
-          <Link href="/dashboard">
+          <Link href="/auth">
             <button className="bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-4 px-12 rounded-full text-2xl md:text-3xl shadow-lg border-2 border-yellow-600 border-dashed transform hover:scale-105 transition-all duration-200">
               start
             </button>
