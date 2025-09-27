@@ -34,6 +34,31 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Copy default behaviors to the new teacher
+    const defaultTeacher = await prisma.teacher.findUnique({
+      where: { email: 'default@teacher.com' }
+    })
+
+    if (defaultTeacher) {
+      const defaultBehaviors = await prisma.behavior.findMany({
+        where: { 
+          teacherId: defaultTeacher.id,
+          isDefault: true
+        }
+      })
+
+      // Create copies of default behaviors for the new teacher
+      for (const defaultBehavior of defaultBehaviors) {
+        await prisma.behavior.create({
+          data: {
+            name: defaultBehavior.name,
+            teacherId: teacher.id,
+            isDefault: false // These are copies, not the original defaults
+          }
+        })
+      }
+    }
+
     // Generate JWT token
     const token = jwt.sign(
       { teacherId: teacher.id, email: teacher.email },

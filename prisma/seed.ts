@@ -40,11 +40,13 @@ async function main() {
       },
       update: {
         // Mark as default behavior
-        name: behaviorName
+        name: behaviorName,
+        isDefault: true
       },
       create: {
         name: behaviorName,
-        teacherId: defaultTeacher.id
+        teacherId: defaultTeacher.id,
+        isDefault: true
       }
     })
     console.log(`✅ Default behavior created: ${behaviorName}`)

@@ -6,21 +6,22 @@ generator client {
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = "file:./dev.db"
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
 }
 
 model Behavior {
     id        String   @id @default(cuid())
     name      String
-    teacherId String
+    teacherId String?
     isDefault Boolean  @default(false)
     createdAt DateTime @default(now())
     updatedAt DateTime @updatedAt
 
     // Relations
-    teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-    points  Point[]
+    teacher             Teacher?            @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    points              Point[]
+    groupWorkBehaviors  GroupWorkBehavior[]
 
     @@unique([name, teacherId])
     @@map("behaviors")
@@ -35,8 +36,9 @@ model Teacher {
     updatedAt DateTime @updatedAt
 
     // Relations
-    classes   Class[]
-    behaviors Behavior[]
+    classes    Class[]
+    behaviors  Behavior[]
+    groupWorks GroupWork[]
 
     @@map("teachers")
 }
@@ -50,8 +52,9 @@ model Class {
     updatedAt   DateTime @updatedAt
 
     // Relations
-    teacher  Teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-    students Student[]
+    teacher    Teacher     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    students   Student[]
+    groupWorks GroupWork[]
 
     @@map("classes")
 }
@@ -65,8 +68,9 @@ model Student {
     updatedAt DateTime @updatedAt
 
     // Relations
-    class        Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
-    pointRecords Point[]
+    class         Class          @relation(fields: [classId], references: [id], onDelete: Cascade)
+    pointRecords  Point[]
+    groupStudents GroupStudent[]
 
     @@map("students")
 }
@@ -86,4 +90,63 @@ model Point {
     behavior Behavior? @relation(fields: [behaviorId], references: [id], onDelete: SetNull)
 
     @@map("points")
+}
+
+model GroupWork {
+    id        String   @id @default(cuid())
+    name      String
+    classId   String
+    teacherId String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    // Relations
+    class    Class             @relation(fields: [classId], references: [id], onDelete: Cascade)
+    teacher  Teacher           @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    groups   Group[]
+    behaviors GroupWorkBehavior[]
+
+    @@map("group_works")
+}
+
+model Group {
+    id          String   @id @default(cuid())
+    name        String
+    groupWorkId String
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    // Relations
+    groupWork GroupWork      @relation(fields: [groupWorkId], references: [id], onDelete: Cascade)
+    students  GroupStudent[]
+
+    @@map("groups")
+}
+
+model GroupStudent {
+    id        String   @id @default(cuid())
+    groupId   String
+    studentId String
+    createdAt DateTime @default(now())
+
+    // Relations
+    group   Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+    @@unique([groupId, studentId])
+    @@map("group_students")
+}
+
+model GroupWorkBehavior {
+    id          String   @id @default(cuid())
+    groupWorkId String
+    behaviorId  String
+    createdAt   DateTime @default(now())
+
+    // Relations
+    groupWork GroupWork @relation(fields: [groupWorkId], references: [id], onDelete: Cascade)
+    behavior  Behavior  @relation(fields: [behaviorId], references: [id], onDelete: Cascade)
+
+    @@unique([groupWorkId, behaviorId])
+    @@map("group_work_behaviors")
 }

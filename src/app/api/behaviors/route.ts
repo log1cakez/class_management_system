@@ -11,33 +11,13 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Teacher ID is required' }, { status: 400 })
     }
 
-    // Get teacher's custom behaviors
-    const customBehaviors = await prisma.behavior.findMany({
+    // Get all behaviors for this teacher (including copied defaults and custom behaviors)
+    const allBehaviors = await prisma.behavior.findMany({
       where: { 
-        teacherId,
-        isDefault: false
+        teacherId
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'asc' } // Order by creation date - copied defaults will be first since they're created during registration
     })
-
-    // Get default behaviors (from default teacher)
-    const defaultTeacher = await prisma.teacher.findUnique({
-      where: { email: 'default@teacher.com' }
-    })
-
-    let defaultBehaviors = []
-    if (defaultTeacher) {
-      defaultBehaviors = await prisma.behavior.findMany({
-        where: { 
-          teacherId: defaultTeacher.id,
-          isDefault: true
-        },
-        orderBy: { createdAt: 'asc' }
-      })
-    }
-
-    // Combine default and custom behaviors (defaults first)
-    const allBehaviors = [...defaultBehaviors, ...customBehaviors]
 
     return NextResponse.json(allBehaviors)
   } catch (error) {
@@ -48,9 +28,14 @@ export async function GET(request: NextRequest) {
 
 // POST /api/behaviors - Create a new behavior
 export async function POST(request: NextRequest) {
+  let name: string | undefined
+  let teacherId: string | undefined
+  
   try {
     const body = await request.json()
-    const { name, teacherId } = body
+    const parsed = body
+    name = parsed.name
+    teacherId = parsed.teacherId
 
     console.log('Creating behavior with data:', { name, teacherId })
 
@@ -86,8 +71,8 @@ export async function POST(request: NextRequest) {
     console.error('Error details:', {
       message: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined,
-      name,
-      teacherId
+      name: name,
+      teacherId: teacherId
     })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -145,19 +130,24 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Behavior ID and teacherId are required' }, { status: 400 })
     }
 
-    // First verify the behavior exists and belongs to this teacher
-    const existingBehavior = await prisma.behavior.findFirst({
-      where: { 
-        id,
-        teacherId // Ensure teacher owns this behavior
-      }
+    // First verify the behavior exists
+    const existingBehavior = await prisma.behavior.findUnique({
+      where: { id }
     })
 
     if (!existingBehavior) {
-      return NextResponse.json({ error: 'Behavior not found or access denied' }, { status: 404 })
+      return NextResponse.json({ error: 'Behavior not found' }, { status: 404 })
     }
 
-    // Allow deletion of all behaviors (including default ones)
+    // Prevent deletion of default behaviors by regular teachers
+    if (existingBehavior.isDefault) {
+      return NextResponse.json({ error: 'Cannot delete default behaviors' }, { status: 403 })
+    }
+
+    // For custom behaviors, ensure the teacher owns them
+    if (existingBehavior.teacherId !== teacherId) {
+      return NextResponse.json({ error: 'Access denied - you can only delete your own custom behaviors' }, { status: 403 })
+    }
 
     // Delete the behavior
     await prisma.behavior.delete({
