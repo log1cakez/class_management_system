@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build where clause
-    const whereClause: { teacherId: string; behaviorType?: string } = { 
+    const whereClause: any = { 
       teacherId
     }
 
@@ -66,18 +66,16 @@ export async function POST(request: NextRequest) {
     })
 
     if (!teacher) {
-      console.log('Teacher not found:', teacherId)
       return NextResponse.json({ error: 'Teacher not found' }, { status: 404 })
     }
 
-    console.log('Teacher found, creating behavior:', teacher.name)
 
     const newBehavior = await prisma.behavior.create({
       data: {
         name,
         teacherId,
-        behaviorType: (behaviorType || 'INDIVIDUAL') as 'INDIVIDUAL' | 'GROUP_WORK'
-      }
+        behaviorType: behaviorType || 'INDIVIDUAL'
+      } as any
     })
 
     return NextResponse.json(newBehavior, { status: 201 })

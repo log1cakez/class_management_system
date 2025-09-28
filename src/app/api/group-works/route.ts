@@ -38,8 +38,7 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(groupWorks);
-  } catch (error) {
-    console.error("Error fetching group works:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch group works" },
       { status: 500 }
@@ -95,7 +94,7 @@ export async function POST(request: NextRequest) {
 
     
     if (validBehaviors.length !== behaviorIds.length) {
-      const invalidIds = behaviorIds.filter(id => !validBehaviors.some(b => b.id === id));
+      const invalidIds = behaviorIds.filter((id: string) => !validBehaviors.some(b => b.id === id));
       return NextResponse.json(
         { error: `Invalid behavior IDs: ${invalidIds.join(', ')}` },
         { status: 400 }
@@ -200,8 +199,7 @@ export async function DELETE(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Error deleting group work:", error);
+  } catch {
     return NextResponse.json(
       { error: "Failed to delete group work" },
       { status: 500 }

@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Group ID is required' }, { status: 400 })
     }
 
-    const groupPoints = await prisma.groupPoint.findMany({
+    const groupPoints = await prisma.groupWorkAward.findMany({
       where: { groupId },
       include: {
         behavior: true,
@@ -25,8 +25,7 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json(groupPoints)
-  } catch (error) {
-    console.error('Error fetching group points:', error)
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -35,12 +34,11 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { groupId, behaviorId, points, reason, behaviorName } = body
+    const { groupId, behaviorId, points, reason, behaviorName, teacherId } = body
 
-    console.log('Awarding group points with data:', { groupId, behaviorId, points, reason, behaviorName })
 
-    if (!groupId || !points || !reason) {
-      return NextResponse.json({ error: 'Group ID, points, and reason are required' }, { status: 400 })
+    if (!groupId || !points || !reason || !teacherId) {
+      return NextResponse.json({ error: 'Group ID, points, reason, and teacher ID are required' }, { status: 400 })
     }
 
     // Verify group exists
@@ -56,13 +54,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Create group point record
-    const groupPoint = await prisma.groupPoint.create({
+    const groupPoint = await prisma.groupWorkAward.create({
       data: {
         groupId,
         behaviorId: behaviorId || null,
         points,
-        reason,
-        behaviorName: behaviorName || null
+        praise: reason,
+        awardedBy: teacherId
       },
       include: {
         behavior: true,
@@ -74,10 +72,8 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    console.log('Group points awarded successfully:', groupPoint.id)
     return NextResponse.json(groupPoint, { status: 201 })
-  } catch (error) {
-    console.error('Error awarding group points:', error)
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -88,14 +84,13 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
     const { id, points, reason, behaviorName } = body
 
-    console.log('Updating group points with data:', { id, points, reason, behaviorName })
 
     if (!id) {
       return NextResponse.json({ error: 'Point ID is required' }, { status: 400 })
     }
 
     // Verify the point exists
-    const existingPoint = await prisma.groupPoint.findUnique({
+    const existingPoint = await prisma.groupWorkAward.findUnique({
       where: { id }
     })
 
@@ -104,12 +99,11 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update the point
-    const updatedPoint = await prisma.groupPoint.update({
+    const updatedPoint = await prisma.groupWorkAward.update({
       where: { id },
       data: {
         points: points !== undefined ? points : existingPoint.points,
-        reason: reason || existingPoint.reason,
-        behaviorName: behaviorName !== undefined ? behaviorName : existingPoint.behaviorName
+        praise: reason || existingPoint.praise
       },
       include: {
         behavior: true,
@@ -122,8 +116,7 @@ export async function PUT(request: NextRequest) {
     })
 
     return NextResponse.json(updatedPoint)
-  } catch (error) {
-    console.error('Error updating group points:', error)
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -134,14 +127,13 @@ export async function DELETE(request: NextRequest) {
     const body = await request.json()
     const { id } = body
 
-    console.log('Deleting group points with data:', { id })
 
     if (!id) {
       return NextResponse.json({ error: 'Point ID is required' }, { status: 400 })
     }
 
     // Verify the point exists
-    const existingPoint = await prisma.groupPoint.findUnique({
+    const existingPoint = await prisma.groupWorkAward.findUnique({
       where: { id }
     })
 
@@ -150,13 +142,12 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Delete the point
-    await prisma.groupPoint.delete({
+    await prisma.groupWorkAward.delete({
       where: { id }
     })
 
     return NextResponse.json({ message: 'Group point deleted successfully' })
-  } catch (error) {
-    console.error('Error deleting group points:', error)
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

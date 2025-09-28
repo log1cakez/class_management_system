@@ -4,12 +4,12 @@ import { prisma } from "@/lib/prisma";
 // PUT /api/group-works/[id] - Update a group work
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const body = await request.json();
     const { name, behaviorIds, groups, teacherId, behaviorPraises } = body;
-    const { id } = params;
+    const { id } = await params;
 
     if (!teacherId) {
       return NextResponse.json({ error: "Teacher ID is required" }, { status: 400 });
@@ -128,10 +128,10 @@ export async function PUT(
 // DELETE /api/group-works/[id] - Delete a specific group work
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const { searchParams } = new URL(request.url);
     const teacherId = searchParams.get("teacherId");
 
