@@ -31,8 +31,7 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json(classStudents)
-  } catch (error) {
-    console.error('Error fetching students:', error)
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -68,8 +67,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(student, { status: 201 })
-  } catch (error) {
-    console.error('Error creating student:', error)
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -121,7 +119,6 @@ export async function PUT(request: NextRequest) {
     )
 
     const updatedStudents = await Promise.all(updatePromises)
-    console.log('Successfully updated student points:', updatedStudents.length, 'students')
 
     // Create point records for tracking (non-blocking)
     try {
@@ -137,9 +134,7 @@ export async function PUT(request: NextRequest) {
       )
 
       await Promise.all(pointRecordPromises)
-      console.log('Successfully created point records:', studentIds.length, 'records')
     } catch (pointError) {
-      console.error('Error creating point records (non-critical):', pointError)
       // Don't fail the entire request if point records fail
     }
 
@@ -147,7 +142,6 @@ export async function PUT(request: NextRequest) {
     try {
       return NextResponse.json(updatedStudents)
     } catch (responseError) {
-      console.error('Error serializing response:', responseError)
       // Return a simplified response if serialization fails
       return NextResponse.json({ 
         success: true, 
@@ -155,37 +149,7 @@ export async function PUT(request: NextRequest) {
         studentCount: updatedStudents.length 
       })
     }
-  } catch (error) {
-    console.error('Error updating student points:', error)
-    console.error('Error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      studentIds,
-      pointsToAdd,
-      teacherId
-    })
-    
-    // Check if students were actually updated despite the error
-    try {
-      const checkStudents = await prisma.student.findMany({
-        where: { id: { in: studentIds } },
-        select: { id: true, points: true }
-      })
-      
-      // If points were updated, return success with a warning
-      const hasUpdatedPoints = checkStudents.some(s => s.points > 0)
-      if (hasUpdatedPoints) {
-        console.log('Points were updated despite error, returning success')
-        return NextResponse.json({ 
-          success: true, 
-          message: 'Points updated successfully (with warnings)',
-          studentCount: checkStudents.length 
-        })
-      }
-    } catch (checkError) {
-      console.error('Error checking student points:', checkError)
-    }
-    
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -222,8 +186,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     return NextResponse.json({ message: 'Student deleted successfully' })
-  } catch (error) {
-    console.error('Error deleting student:', error)
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
