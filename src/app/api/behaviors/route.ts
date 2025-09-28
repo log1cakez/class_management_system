@@ -1,27 +1,35 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// GET /api/behaviors?teacherId=xxx - Get all behaviors for a teacher (including default behaviors)
+// GET /api/behaviors?teacherId=xxx&type=GROUP_WORK - Get behaviors for a teacher, optionally filtered by type
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const teacherId = searchParams.get('teacherId')
+    const behaviorType = searchParams.get('type') // 'INDIVIDUAL' or 'GROUP_WORK'
 
     if (!teacherId) {
       return NextResponse.json({ error: 'Teacher ID is required' }, { status: 400 })
     }
 
-    // Get all behaviors for this teacher (including copied defaults and custom behaviors)
-    const allBehaviors = await prisma.behavior.findMany({
-      where: { 
-        teacherId
-      },
+    // Build where clause
+    const whereClause: any = { 
+      teacherId
+    }
+
+    // Add behavior type filter if specified
+    if (behaviorType && (behaviorType === 'INDIVIDUAL' || behaviorType === 'GROUP_WORK')) {
+      whereClause.behaviorType = behaviorType
+    }
+
+    // Get behaviors for this teacher (including copied defaults and custom behaviors)
+    const behaviors = await prisma.behavior.findMany({
+      where: whereClause,
       orderBy: { createdAt: 'asc' } // Order by creation date - copied defaults will be first since they're created during registration
     })
 
-    return NextResponse.json(allBehaviors)
+    return NextResponse.json(behaviors)
   } catch (error) {
-    console.error('Error fetching behaviors:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -30,18 +38,25 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   let name: string | undefined
   let teacherId: string | undefined
+  let behaviorType: string | undefined
   
   try {
     const body = await request.json()
     const parsed = body
     name = parsed.name
     teacherId = parsed.teacherId
+    behaviorType = parsed.behaviorType || 'INDIVIDUAL' // Default to INDIVIDUAL
 
-    console.log('Creating behavior with data:', { name, teacherId })
+    console.log('Creating behavior with data:', { name, teacherId, behaviorType })
 
     if (!name || !teacherId) {
       console.log('Missing required fields:', { name: !!name, teacherId: !!teacherId })
       return NextResponse.json({ error: 'Name and teacherId are required' }, { status: 400 })
+    }
+
+    // Validate behavior type
+    if (behaviorType !== 'INDIVIDUAL' && behaviorType !== 'GROUP_WORK') {
+      return NextResponse.json({ error: 'Invalid behavior type. Must be INDIVIDUAL or GROUP_WORK' }, { status: 400 })
     }
 
     // Verify teacher exists
@@ -60,20 +75,13 @@ export async function POST(request: NextRequest) {
     const newBehavior = await prisma.behavior.create({
       data: {
         name,
-        teacherId
+        teacherId,
+        behaviorType: (behaviorType || 'INDIVIDUAL') as 'INDIVIDUAL' | 'GROUP_WORK'
       }
     })
 
-    console.log('Behavior created successfully:', newBehavior.id)
     return NextResponse.json(newBehavior, { status: 201 })
   } catch (error) {
-    console.error('Error creating behavior:', error)
-    console.error('Error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      name: name,
-      teacherId: teacherId
-    })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -112,7 +120,6 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(updatedBehavior)
   } catch (error) {
-    console.error('Error updating behavior:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -156,7 +163,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ message: 'Behavior deleted successfully' })
   } catch (error) {
-    console.error('Error deleting behavior:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

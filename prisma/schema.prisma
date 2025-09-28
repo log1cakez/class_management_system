@@ -11,20 +11,28 @@ datasource db {
 }
 
 model Behavior {
-    id        String   @id @default(cuid())
-    name      String
-    teacherId String?
-    isDefault Boolean  @default(false)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+    id           String      @id @default(cuid())
+    name         String
+    teacherId    String?
+    isDefault    Boolean     @default(false)
+    behaviorType BehaviorType @default(INDIVIDUAL)
+    praise       String?     // Predefined praise message for this behavior
+    createdAt    DateTime    @default(now())
+    updatedAt    DateTime    @updatedAt
 
     // Relations
     teacher             Teacher?            @relation(fields: [teacherId], references: [id], onDelete: Cascade)
     points              Point[]
     groupWorkBehaviors  GroupWorkBehavior[]
+    groupWorkAwards     GroupWorkAward[]
 
     @@unique([name, teacherId])
     @@map("behaviors")
+}
+
+enum BehaviorType {
+    INDIVIDUAL
+    GROUP_WORK
 }
 
 model Teacher {
@@ -119,6 +127,7 @@ model Group {
     // Relations
     groupWork GroupWork      @relation(fields: [groupWorkId], references: [id], onDelete: Cascade)
     students  GroupStudent[]
+    awards    GroupWorkAward[]
 
     @@map("groups")
 }
@@ -141,6 +150,7 @@ model GroupWorkBehavior {
     id          String   @id @default(cuid())
     groupWorkId String
     behaviorId  String
+    praise      String?  // Optional praise message for this behavior
     createdAt   DateTime @default(now())
 
     // Relations
@@ -149,4 +159,22 @@ model GroupWorkBehavior {
 
     @@unique([groupWorkId, behaviorId])
     @@map("group_work_behaviors")
+}
+
+model GroupWorkAward {
+    id          String   @id @default(cuid())
+    groupId     String
+    behaviorId  String?
+    points      Int
+    praise      String
+    badgeId     String?
+    badgeName   String?
+    awardedBy   String
+    createdAt   DateTime @default(now())
+
+    // Relations
+    group    Group     @relation(fields: [groupId], references: [id], onDelete: Cascade)
+    behavior Behavior? @relation(fields: [behaviorId], references: [id], onDelete: SetNull)
+
+    @@map("group_work_awards")
 }

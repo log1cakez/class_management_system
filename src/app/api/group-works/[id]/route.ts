@@ -8,7 +8,7 @@ export async function PUT(
 ) {
   try {
     const body = await request.json();
-    const { name, behaviorIds, groups, teacherId } = body;
+    const { name, behaviorIds, groups, teacherId, behaviorPraises } = body;
     const { id } = params;
 
     if (!teacherId) {
@@ -87,6 +87,7 @@ export async function PUT(
           data: behaviorIds.map((behaviorId: string) => ({
             groupWorkId: id,
             behaviorId,
+            praise: behaviorPraises?.[behaviorId] || null,
           })),
         });
       }

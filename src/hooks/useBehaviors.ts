@@ -5,9 +5,10 @@ interface Behavior {
   name: string;
   teacherId: string;
   isDefault?: boolean;
+  behaviorType?: 'INDIVIDUAL' | 'GROUP_WORK';
 }
 
-export function useBehaviors(teacherId: string | null) {
+export function useBehaviors(teacherId: string | null, behaviorType?: 'INDIVIDUAL' | 'GROUP_WORK') {
   const [behaviors, setBehaviors] = useState<Behavior[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +20,12 @@ export function useBehaviors(teacherId: string | null) {
     setError(null);
     
     try {
-      const response = await fetch(`/api/behaviors?teacherId=${teacherId}`);
+      let url = `/api/behaviors?teacherId=${teacherId}`;
+      if (behaviorType) {
+        url += `&type=${behaviorType}`;
+      }
+      
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error("Failed to fetch behaviors");
       }
@@ -30,7 +36,7 @@ export function useBehaviors(teacherId: string | null) {
     } finally {
       setLoading(false);
     }
-  }, [teacherId]);
+  }, [teacherId, behaviorType]);
 
   const createBehavior = async (name: string) => {
     if (!teacherId) throw new Error("No teacher ID");
@@ -44,6 +50,7 @@ export function useBehaviors(teacherId: string | null) {
         body: JSON.stringify({
           name,
           teacherId,
+          behaviorType: behaviorType || 'INDIVIDUAL',
         }),
       });
 

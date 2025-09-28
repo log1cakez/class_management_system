@@ -51,16 +51,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, classId, behaviorIds, groups, teacherId } = body;
+    const { name, classId, behaviorIds, groups, teacherId, behaviorPraises } = body;
 
-    console.log("Received data:", { name, classId, behaviorIds, groups, teacherId });
-    console.log("Field validation:", {
-      hasName: !!name,
-      hasClassId: !!classId,
-      hasBehaviorIds: !!behaviorIds,
-      hasGroups: !!groups,
-      hasTeacherId: !!teacherId
-    });
 
     if (!teacherId) {
       return NextResponse.json({ error: "Teacher ID is required" }, { status: 400 });
@@ -74,7 +66,6 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify the class belongs to the teacher
-    console.log("Checking if class exists:", { classId, teacherId });
     const classExists = await prisma.class.findFirst({
       where: {
         id: classId,
@@ -82,7 +73,6 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log("Class exists:", !!classExists);
     if (!classExists) {
       return NextResponse.json(
         { error: "Class not found or access denied" },
@@ -90,16 +80,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create the group work with all related data
-    console.log("Creating group work with data:", {
-      name,
-      classId,
-      teacherId,
-      groupsCount: groups.length,
-      behaviorsCount: behaviorIds.length,
-      behaviorIds,
-      groups: groups.map(g => ({ name: g.name, studentIds: g.studentIds }))
+    // Validate that all behavior IDs exist, belong to the teacher, and are GROUP_WORK behaviors
+    const validBehaviors = await prisma.behavior.findMany({
+      where: {
+        id: { in: behaviorIds },
+        behaviorType: 'GROUP_WORK', // Only allow GROUP_WORK behaviors
+        OR: [
+          { teacherId: teacherId },
+          { isDefault: true }
+        ]
+      },
+      select: { id: true, name: true }
     });
+
+    
+    if (validBehaviors.length !== behaviorIds.length) {
+      const invalidIds = behaviorIds.filter(id => !validBehaviors.some(b => b.id === id));
+      return NextResponse.json(
+        { error: `Invalid behavior IDs: ${invalidIds.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    // Create the group work with all related data
 
     const groupWork = await prisma.groupWork.create({
       data: {
@@ -119,6 +122,7 @@ export async function POST(request: NextRequest) {
         behaviors: {
           create: behaviorIds.map((behaviorId: string) => ({
             behaviorId,
+            praise: behaviorPraises?.[behaviorId] || null,
           })),
         },
       },
@@ -141,11 +145,9 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log("Group work created successfully:", groupWork.id);
 
     return NextResponse.json(groupWork);
   } catch (error) {
-    console.error("Error creating group work:", error);
     
     // Provide more specific error messages
     let errorMessage = "Failed to create group work";

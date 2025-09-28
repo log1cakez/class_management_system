@@ -55,6 +55,7 @@ interface CreateGroupWorkData {
     name: string;
     studentIds: string[];
   }[];
+  behaviorPraises?: Record<string, string>;
 }
 
 export function useGroupWorks(teacherId: string | null) {
@@ -85,7 +86,7 @@ export function useGroupWorks(teacherId: string | null) {
     }
   }, [teacherId]);
 
-  const createGroupWork = async (data: CreateGroupWorkData & { behaviorNames?: Record<string, string> }) => {
+  const createGroupWork = async (data: CreateGroupWorkData & { behaviorNames?: Record<string, string>; behaviorPraises?: Record<string, string> }) => {
     if (!teacherId) throw new Error("No teacher ID");
     
     try {
@@ -94,7 +95,6 @@ export function useGroupWorks(teacherId: string | null) {
         teacherId,
       };
       
-      console.log("Sending data to API:", requestData);
       
       const response = await fetch("/api/group-works", {
         method: "POST",
@@ -120,7 +120,7 @@ export function useGroupWorks(teacherId: string | null) {
     }
   };
 
-  const updateGroupWork = async (id: string, data: Partial<CreateGroupWorkData & { behaviorNames?: Record<string, string> }>) => {
+  const updateGroupWork = async (id: string, data: Partial<CreateGroupWorkData & { behaviorNames?: Record<string, string>; behaviorPraises?: Record<string, string> }>) => {
     if (!teacherId) throw new Error("No teacher ID");
     
     try {

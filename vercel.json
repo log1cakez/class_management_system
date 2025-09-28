@@ -2,13 +2,15 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "installCommand": "npm install && npx prisma generate",
-  "functions": {
-    "src/app/api/**/*.ts": {
-      "maxDuration": 30
-    }
-  },
+  "installCommand": "npm install",
   "env": {
-    "NODE_ENV": "production"
+    "DATABASE_URL": "@database_url",
+    "JWT_SECRET": "@jwt_secret"
+  },
+  "build": {
+    "env": {
+      "DATABASE_URL": "@database_url",
+      "JWT_SECRET": "@jwt_secret"
+    }
   }
 }

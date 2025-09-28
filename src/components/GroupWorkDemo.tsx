@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import GroupWorkModal from "./GroupWorkModal";
 import GroupAwardModal from "./GroupAwardModal";
+import BadgeCelebrationModal from "./BadgeCelebrationModal";
 import { useGroupWorks } from "@/hooks/useGroupWorks";
-import { useGroupPoints } from "@/hooks/useGroupPoints";
+import { RewardBadge } from "@/assets/images/badges";
 
 interface GroupWorkDemoProps {
   teacherId: string | null;
@@ -12,11 +13,47 @@ interface GroupWorkDemoProps {
 }
 
 export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps) {
-  const { groupWorks, createGroupWork, updateGroupWork, loading } = useGroupWorks(teacherId);
+  const { groupWorks, createGroupWork, updateGroupWork, deleteGroupWork, loading } = useGroupWorks(teacherId);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAwardModal, setShowAwardModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showBadgeCelebration, setShowBadgeCelebration] = useState(false);
+  const [earnedBadges, setEarnedBadges] = useState<RewardBadge[]>([]);
   const [selectedGroupWork, setSelectedGroupWork] = useState<any>(null);
+  const [groupPoints, setGroupPoints] = useState<Record<string, Record<string, number>>>({});
+
+  // Fetch group points for all group works
+  const fetchGroupPoints = async (groupWorks: any[]) => {
+    try {
+      const pointsData: Record<string, Record<string, number>> = {};
+      
+      for (const groupWork of groupWorks) {
+        pointsData[groupWork.id] = {};
+        
+        for (const group of groupWork.groups) {
+          const response = await fetch(`/api/group-work-awards?groupId=${group.id}`);
+          if (response.ok) {
+            const awards = await response.json();
+            const totalPoints = awards.reduce((sum: number, award: any) => sum + award.points, 0);
+            pointsData[groupWork.id][group.id] = totalPoints;
+          } else {
+            pointsData[groupWork.id][group.id] = 0;
+          }
+        }
+      }
+      
+      setGroupPoints(pointsData);
+    } catch (error) {
+      console.error("Error fetching group points:", error);
+    }
+  };
+
+  // Fetch points when group works change
+  useEffect(() => {
+    if (groupWorks.length > 0) {
+      fetchGroupPoints(groupWorks);
+    }
+  }, [groupWorks]);
 
   const handleCreateGroupWork = async (data: {
     name: string;
@@ -41,14 +78,56 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
     groupId: string;
     behaviorId: string;
     points: number;
-    reason: string;
   }[]) => {
     try {
-      // Here you would use the useGroupPoints hook to award points
-      // For now, just show a success message
-      console.log("Awards to be given:", awards);
-      alert(`Successfully awarded points to ${awards.length} groups!`);
-      setShowAwardModal(false);
+      
+      // Award points and badges to each group
+      const awardPromises = awards.map(async (award) => {
+        const response = await fetch('/api/group-work-awards', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            groupId: award.groupId,
+            behaviorId: award.behaviorId,
+            points: award.points,
+            teacherId: teacherId,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to award points to group ${award.groupId}`);
+        }
+
+        return response.json();
+      });
+
+      const results = await Promise.all(awardPromises);
+      
+      // Extract badges from results with praise messages and group names
+      const badges = results.map((result, index) => {
+        // Find the group name from the selected group work
+        const group = selectedGroupWork?.groups.find(g => g.id === awards[index].groupId);
+        const groupName = group?.name || 'Group';
+        
+        return {
+          ...result.badge,
+          praise: result.praise,
+          groupName: groupName
+        };
+      }).filter(badge => badge.id && badge.id !== undefined);
+      
+      if (badges.length > 0) {
+        setEarnedBadges(badges);
+        setShowBadgeCelebration(true);
+      } else {
+        alert(`Successfully awarded points to ${awards.length} groups!`);
+        setShowAwardModal(false);
+      }
+      
+      // Refresh group points after awarding
+      fetchGroupPoints(groupWorks);
     } catch (error) {
       console.error("Error awarding points:", error);
       alert("Failed to award points. Please try again.");
@@ -73,6 +152,7 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
       name: string;
       studentIds: string[];
     }[];
+    behaviorPraises?: Record<string, string>;
   }) => {
     try {
       if (selectedGroupWork) {
@@ -83,6 +163,18 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
     } catch (error) {
       console.error("Error updating group work:", error);
       alert("Failed to update group work. Please try again.");
+    }
+  };
+
+  const handleDeleteGroupWork = async (groupWorkId: string) => {
+    if (window.confirm("Are you sure you want to delete this group work activity? This action cannot be undone.")) {
+      try {
+        await deleteGroupWork(groupWorkId);
+        alert("Group work activity deleted successfully!");
+      } catch (error) {
+        console.error("Error deleting group work:", error);
+        alert("Failed to delete group work. Please try again.");
+      }
     }
   };
 
@@ -132,11 +224,15 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
               <div className="mb-4">
                 <p className="text-sm font-semibold text-gray-700 mb-1">Groups ({groupWork.groups.length}):</p>
                 <div className="space-y-1">
-                  {groupWork.groups.map((group) => (
-                    <div key={group.id} className="text-sm text-gray-600">
-                      • {group.name} ({group.students.length} students)
-                    </div>
-                  ))}
+                  {groupWork.groups.map((group) => {
+                    const points = groupPoints[groupWork.id]?.[group.id] || 0;
+                    return (
+                      <div key={group.id} className="text-sm text-gray-600 flex justify-between items-center">
+                        <span>• {group.name} ({group.students.length} students)</span>
+                        <span className="text-green-600 font-semibold">{points} pts</span>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -163,6 +259,12 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
                   className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm"
                 >
                   Edit
+                </button>
+                <button
+                  onClick={() => handleDeleteGroupWork(groupWork.id)}
+                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm"
+                >
+                  Delete
                 </button>
               </div>
             </div>
@@ -196,6 +298,16 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
         onClose={() => setShowAwardModal(false)}
         onConfirm={handleAwardPoints}
         groupWork={selectedGroupWork}
+      />
+
+      <BadgeCelebrationModal
+        isOpen={showBadgeCelebration}
+        badges={earnedBadges}
+        onClose={() => {
+          setShowBadgeCelebration(false);
+          setEarnedBadges([]);
+          setShowAwardModal(false);
+        }}
       />
     </div>
   );

@@ -47,7 +47,6 @@ interface GroupAwardModalProps {
     groupId: string;
     behaviorId: string;
     points: number;
-    reason: string;
   }[]) => void;
   groupWork: GroupWork | null;
 }
@@ -61,12 +60,10 @@ export default function GroupAwardModal({
   const [selectedGroup, setSelectedGroup] = useState<string>("");
   const [selectedBehavior, setSelectedBehavior] = useState<string>("");
   const [points, setPoints] = useState<number>(1);
-  const [reason, setReason] = useState<string>("");
   const [awards, setAwards] = useState<{
     groupId: string;
     behaviorId: string;
     points: number;
-    reason: string;
     groupName: string;
     behaviorName: string;
   }[]>([]);
@@ -75,12 +72,11 @@ export default function GroupAwardModal({
     setSelectedGroup("");
     setSelectedBehavior("");
     setPoints(1);
-    setReason("");
   };
 
   const addAward = () => {
-    if (!selectedGroup || !selectedBehavior || !reason.trim()) {
-      alert("Please fill in all fields");
+    if (!selectedGroup || !selectedBehavior) {
+      alert("Please select a group and behavior");
       return;
     }
 
@@ -96,7 +92,6 @@ export default function GroupAwardModal({
       groupId: selectedGroup,
       behaviorId: selectedBehavior,
       points,
-      reason: reason.trim(),
       groupName: group.name,
       behaviorName: behavior.behavior.name,
     };
@@ -115,12 +110,15 @@ export default function GroupAwardModal({
       return;
     }
 
-    onConfirm(awards.map(({ groupId, behaviorId, points, reason }) => ({
+    onConfirm(awards.map(({ groupId, behaviorId, points }) => ({
       groupId,
       behaviorId,
       points,
-      reason,
     })));
+    
+    // Clear the awards list after successful confirmation
+    setAwards([]);
+    resetForm();
     onClose();
   };
 
@@ -230,7 +228,7 @@ export default function GroupAwardModal({
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="mb-4">
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">
                     Points
@@ -240,19 +238,6 @@ export default function GroupAwardModal({
                     min="1"
                     value={points}
                     onChange={(e) => setPoints(parseInt(e.target.value) || 1)}
-                    className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">
-                    Reason
-                  </label>
-                  <input
-                    type="text"
-                    value={reason}
-                    onChange={(e) => setReason(e.target.value)}
-                    placeholder="Enter reason..."
                     className="w-full px-3 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                   />
                 </div>
@@ -286,7 +271,7 @@ export default function GroupAwardModal({
                         <span className="mx-2 text-yellow-700">→</span>
                         <span className="font-bold text-yellow-800">{award.behaviorName}</span>
                         <span className="mx-2 text-yellow-700">({award.points} points)</span>
-                        <span className="text-sm text-yellow-600">- {award.reason}</span>
+                        <span className="text-sm text-yellow-600">- Predefined praise will be used</span>
                       </div>
                       <button
                         onClick={() => removeAward(index)}

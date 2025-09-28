@@ -51,7 +51,7 @@ function DashboardContent() {
     if (classId) params.set("classId", classId);
     if (className) params.set("className", className);
     if (teacherId) params.set("teacherId", teacherId);
-    
+
     router.push(`/groupwork-dashboard?${params.toString()}`);
   };
 
@@ -77,9 +77,8 @@ function DashboardContent() {
     <main className="min-h-screen relative overflow-hidden">
       {/* Background Image */}
       <div
-        className={`absolute inset-0 z-0 transition-all duration-300 ${
-          showTaskModal || showRewardsModal || showGroupWorkModal ? "blur-sm" : ""
-        }`}
+        className={`absolute inset-0 z-0 transition-all duration-300 ${showTaskModal || showRewardsModal || showGroupWorkModal ? "blur-sm" : ""
+          }`}
       >
         <Image
           src={IMAGES.HOMEPAGE_BG}
@@ -96,9 +95,8 @@ function DashboardContent() {
 
       {/* Content Overlay */}
       <div
-        className={`relative z-10 min-h-screen p-8 transition-all duration-300 ${
-          showTaskModal || showRewardsModal ? "blur-sm" : ""
-        }`}
+        className={`relative z-10 min-h-screen p-8 transition-all duration-300 ${showTaskModal || showRewardsModal ? "blur-sm" : ""
+          }`}
       >
         {/* Header Section */}
         <div className="flex justify-between items-center mb-8">
@@ -227,16 +225,16 @@ function DashboardContent() {
                   <Image
                     src={
                       student.points >= 30
-                        ? DUCK_ICONS.DUCK_5
+                        ? DUCK_ICONS.DUCK_6
                         : student.points >= 25
-                        ? DUCK_ICONS.DUCK_4
-                        : student.points >= 20
-                        ? DUCK_ICONS.DUCK_3
-                        : student.points >= 10
-                        ? DUCK_ICONS.DUCK_2
-                        : student.points >= 5
-                        ? DUCK_ICONS.DUCK_1
-                        : DUCK_ICONS.DUCK_1
+                          ? DUCK_ICONS.DUCK_5
+                          : student.points >= 20
+                            ? DUCK_ICONS.DUCK_4
+                            : student.points >= 10
+                              ? DUCK_ICONS.DUCK_3
+                              : student.points >= 5
+                                ? DUCK_ICONS.DUCK_2
+                                : DUCK_ICONS.DUCK_1
                     }
                     alt={`duck level ${Math.floor(student.points / 25) + 1}`}
                     width={500}
@@ -292,11 +290,10 @@ function DashboardContent() {
                 className="bg-pink-400 hover:bg-pink-500 rounded-2xl p-6 cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg border-2 border-pink-500 min-w-[200px] text-center"
                 onClick={() => {
                   setShowTaskModal(false);
-                  window.location.href = `/individual_task${
-                    classId && teacherId
-                      ? `?classId=${classId}&teacherId=${teacherId}`
-                      : ""
-                  }`;
+                  window.location.href = `/individual_task${classId && teacherId
+                    ? `?classId=${classId}&teacherId=${teacherId}`
+                    : ""
+                    }`;
                 }}
               >
                 <div className="text-2xl font-bold text-white mb-2">
@@ -456,7 +453,7 @@ function DashboardContent() {
         onClose={() => setShowGroupWorkModal(false)}
         onConfirm={handleCreateGroupWork}
         teacherId={teacherId}
-        classId={classId}
+        classId={classId || undefined}
       />
     </main>
   );

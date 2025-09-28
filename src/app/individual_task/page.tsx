@@ -252,6 +252,7 @@ function IndividualTaskContent() {
         onConfirm={handleBehaviorConfirm}
         selectedStudents={students.filter((s) => s.isSelected).map((s) => s.id)}
         teacherId={teacherId}
+        behaviorType="INDIVIDUAL"
       />
 
       {/* Compliment Modal */}
