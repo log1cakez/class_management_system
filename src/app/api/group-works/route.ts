@@ -38,7 +38,8 @@ export async function GET(request: NextRequest) {
     });
 
     return NextResponse.json(groupWorks);
-  } catch {
+  } catch (error) {
+    console.error("Error fetching group works:", error);
     return NextResponse.json(
       { error: "Failed to fetch group works" },
       { status: 500 }
@@ -52,6 +53,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, classId, behaviorIds, groups, teacherId, behaviorPraises } = body;
 
+    console.log("Received data:", { name, classId, behaviorIds, groups, teacherId });
+    console.log("Field validation:", {
+      hasName: !!name,
+      hasClassId: !!classId,
+      hasBehaviorIds: !!behaviorIds,
+      hasGroups: !!groups,
+      hasTeacherId: !!teacherId
+    });
 
     if (!teacherId) {
       return NextResponse.json({ error: "Teacher ID is required" }, { status: 400 });
@@ -65,6 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify the class belongs to the teacher
+    console.log("Checking if class exists:", { classId, teacherId });
     const classExists = await prisma.class.findFirst({
       where: {
         id: classId,
@@ -72,6 +82,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    console.log("Class exists:", !!classExists);
     if (!classExists) {
       return NextResponse.json(
         { error: "Class not found or access denied" },
@@ -80,6 +91,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate that all behavior IDs exist, belong to the teacher, and are GROUP_WORK behaviors
+    console.log("Validating behavior IDs:", behaviorIds);
     const validBehaviors = await prisma.behavior.findMany({
       where: {
         id: { in: behaviorIds },
@@ -92,9 +104,11 @@ export async function POST(request: NextRequest) {
       select: { id: true, name: true }
     });
 
+    console.log("Valid behaviors found:", validBehaviors.map(b => b.id));
     
     if (validBehaviors.length !== behaviorIds.length) {
-      const invalidIds = behaviorIds.filter((id: string) => !validBehaviors.some(b => b.id === id));
+      const invalidIds = behaviorIds.filter(id => !validBehaviors.some(b => b.id === id));
+      console.log("Invalid behavior IDs:", invalidIds);
       return NextResponse.json(
         { error: `Invalid behavior IDs: ${invalidIds.join(', ')}` },
         { status: 400 }
@@ -102,6 +116,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Create the group work with all related data
+    console.log("Creating group work with data:", {
+      name,
+      classId,
+      teacherId,
+      groupsCount: groups.length,
+      behaviorsCount: behaviorIds.length,
+      behaviorIds,
+      groups: groups.map(g => ({ name: g.name, studentIds: g.studentIds }))
+    });
 
     const groupWork = await prisma.groupWork.create({
       data: {
@@ -144,9 +167,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    console.log("Group work created successfully:", groupWork.id);
 
     return NextResponse.json(groupWork);
   } catch (error) {
+    console.error("Error creating group work:", error);
     
     // Provide more specific error messages
     let errorMessage = "Failed to create group work";
@@ -199,7 +224,8 @@ export async function DELETE(request: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error) {
+    console.error("Error deleting group work:", error);
     return NextResponse.json(
       { error: "Failed to delete group work" },
       { status: 500 }

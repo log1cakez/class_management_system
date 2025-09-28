@@ -83,7 +83,7 @@ function GroupWorkDashboardContent() {
           </div>
 
           {/* Group Work Demo Component */}
-          <GroupWorkDemo teacherId={teacherId} classId={classId || undefined} />
+          <GroupWorkDemo teacherId={teacherId} classId={classId} />
         </div>
       </div>
     </main>

@@ -67,6 +67,7 @@ export default function BehaviorSelectionModal({
         setNewBehaviorName("");
         setShowAddForm(false);
       } catch (error) {
+        console.error("Error adding behavior:", error);
         const errorMessage =
           error instanceof Error
             ? error.message
@@ -83,6 +84,7 @@ export default function BehaviorSelectionModal({
         setEditBehaviorName("");
         setShowEditForm(null);
       } catch (error) {
+        console.error("Error updating behavior:", error);
         const errorMessage =
           error instanceof Error
             ? error.message
@@ -99,6 +101,7 @@ export default function BehaviorSelectionModal({
         // Remove the behavior from local state after successful deletion
         setBehaviors(prev => prev.filter(behavior => behavior.id !== id));
       } catch (error) {
+        console.error("Error deleting behavior:", error);
         const errorMessage =
           error instanceof Error
             ? error.message

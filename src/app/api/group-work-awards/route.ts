@@ -8,6 +8,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { groupId, behaviorId, points, praise, teacherId } = body
 
+    console.log('Awarding group work with data:', { groupId, behaviorId, points, praise, teacherId })
 
     if (!groupId || !points || !teacherId) {
       return NextResponse.json({ error: 'Group ID, points, and teacher ID are required' }, { status: 400 })
@@ -41,23 +42,37 @@ export async function POST(request: NextRequest) {
       behavior = await prisma.behavior.findUnique({
         where: { id: behaviorId }
       })
+      console.log('Found behavior:', behavior)
       
       // Find the predefined praise for this behavior in this group work
       const groupWorkBehavior = group.groupWork.behaviors.find(
         (gb: any) => gb.behaviorId === behaviorId
       )
       predefinedPraise = groupWorkBehavior?.praise
+      console.log('Predefined praise:', predefinedPraise)
     }
 
     // Use predefined praise if available, otherwise use the provided praise or a default
     const finalPraise = predefinedPraise || praise || "Great work!"
     
+    console.log('Final praise to use:', finalPraise)
 
     // Get a random badge for the behavior type
     const behaviorType = behavior?.behaviorType || 'GROUP_WORK'
+    console.log('Using behavior type:', behaviorType)
     
     const randomBadge = getRandomBadgeForBehaviorType(behaviorType as 'INDIVIDUAL' | 'GROUP_WORK')
+    console.log('Selected badge:', randomBadge)
 
+    console.log('Creating award with data:', {
+      groupId,
+      behaviorId: behaviorId || null,
+      points,
+      praise: finalPraise,
+      badgeId: randomBadge.id,
+      badgeName: randomBadge.name,
+      awardedBy: teacherId
+    })
 
     // Create the award record
     const award = await prisma.groupWorkAward.create({
@@ -80,6 +95,7 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    console.log('Group work award created successfully:', award.id)
 
     // Return the award with badge information
     return NextResponse.json({
@@ -88,9 +104,20 @@ export async function POST(request: NextRequest) {
       praise: award.praise
     }, { status: 201 })
 
-  } catch {
+  } catch (error) {
+    console.error('Error creating group work award:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      groupId,
+      behaviorId,
+      points,
+      praise,
+      teacherId
+    })
     return NextResponse.json({ 
-      error: 'Internal server error'
+      error: 'Internal server error',
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }

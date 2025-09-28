@@ -2,15 +2,13 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "framework": "nextjs",
-  "installCommand": "npm install",
-  "env": {
-    "DATABASE_URL": "postgresql://neondb_owner:npg_Du4gvifWpT2b@ep-snowy-mode-a18w07ua-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-    "JWT_SECRET": "09f91f47820a80fb288827041b681b3b"
-  },
-  "build": {
-    "env": {
-      "DATABASE_URL": "postgresql://neondb_owner:npg_Du4gvifWpT2b@ep-snowy-mode-a18w07ua-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
-      "JWT_SECRET": "db4e2d1453ac4d5a938bf7c1f6488ae4"
+  "installCommand": "npm install && npx prisma generate",
+  "functions": {
+    "src/app/api/**/*.ts": {
+      "maxDuration": 30
     }
+  },
+  "env": {
+    "NODE_ENV": "production"
   }
 }

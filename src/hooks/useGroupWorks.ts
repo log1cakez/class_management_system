@@ -95,6 +95,7 @@ export function useGroupWorks(teacherId: string | null) {
         teacherId,
       };
       
+      console.log("Sending data to API:", requestData);
       
       const response = await fetch("/api/group-works", {
         method: "POST",

@@ -453,7 +453,7 @@ function DashboardContent() {
         onClose={() => setShowGroupWorkModal(false)}
         onConfirm={handleCreateGroupWork}
         teacherId={teacherId}
-        classId={classId || undefined}
+        classId={classId}
       />
     </main>
   );

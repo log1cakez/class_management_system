@@ -78,6 +78,7 @@ export async function POST(request: NextRequest) {
       token 
     }, { status: 201 })
   } catch (error) {
+    console.error('Error registering teacher:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -125,6 +126,7 @@ export async function PUT(request: NextRequest) {
       token
     })
   } catch (error) {
+    console.error('Error logging in teacher:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

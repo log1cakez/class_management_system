@@ -29,7 +29,8 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json(behaviors)
-  } catch {
+  } catch (error) {
+    console.error('Error fetching behaviors:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -66,20 +67,31 @@ export async function POST(request: NextRequest) {
     })
 
     if (!teacher) {
+      console.log('Teacher not found:', teacherId)
       return NextResponse.json({ error: 'Teacher not found' }, { status: 404 })
     }
 
+    console.log('Teacher found, creating behavior:', teacher.name)
 
     const newBehavior = await prisma.behavior.create({
       data: {
         name,
         teacherId,
-        behaviorType: behaviorType || 'INDIVIDUAL'
-      } as any
+        behaviorType: behaviorType as 'INDIVIDUAL' | 'GROUP_WORK'
+      }
     })
 
+    console.log('Behavior created successfully:', newBehavior.id)
     return NextResponse.json(newBehavior, { status: 201 })
-  } catch {
+  } catch (error) {
+    console.error('Error creating behavior:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: name,
+      teacherId: teacherId,
+      behaviorType: behaviorType
+    })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -117,7 +129,8 @@ export async function PUT(request: NextRequest) {
     })
 
     return NextResponse.json(updatedBehavior)
-  } catch {
+  } catch (error) {
+    console.error('Error updating behavior:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -160,7 +173,8 @@ export async function DELETE(request: NextRequest) {
     })
 
     return NextResponse.json({ message: 'Behavior deleted successfully' })
-  } catch {
+  } catch (error) {
+    console.error('Error deleting behavior:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
