@@ -12,6 +12,9 @@ export function useBehaviors(teacherId: string | null, behaviorType?: 'INDIVIDUA
   const [behaviors, setBehaviors] = useState<Behavior[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [creatingBehavior, setCreatingBehavior] = useState(false);
+  const [updatingBehavior, setUpdatingBehavior] = useState(false);
+  const [deletingBehavior, setDeletingBehavior] = useState(false);
 
   const fetchBehaviors = useCallback(async () => {
     if (!teacherId) return;
@@ -41,6 +44,9 @@ export function useBehaviors(teacherId: string | null, behaviorType?: 'INDIVIDUA
   const createBehavior = async (name: string) => {
     if (!teacherId) throw new Error("No teacher ID");
     
+    setCreatingBehavior(true);
+    setError(null);
+
     try {
       const response = await fetch("/api/behaviors", {
         method: "POST",
@@ -65,12 +71,17 @@ export function useBehaviors(teacherId: string | null, behaviorType?: 'INDIVIDUA
       return newBehavior;
     } catch (err) {
       throw err;
+    } finally {
+      setCreatingBehavior(false);
     }
   };
 
   const updateBehavior = async (id: string, name: string) => {
     if (!teacherId) throw new Error("No teacher ID");
     
+    setUpdatingBehavior(true);
+    setError(null);
+
     try {
       const response = await fetch("/api/behaviors", {
         method: "PUT",
@@ -95,10 +106,15 @@ export function useBehaviors(teacherId: string | null, behaviorType?: 'INDIVIDUA
       return updatedBehavior;
     } catch (err) {
       throw err;
+    } finally {
+      setUpdatingBehavior(false);
     }
   };
 
   const deleteBehavior = async (id: string) => {
+    setDeletingBehavior(true);
+    setError(null);
+
     try {
       const response = await fetch("/api/behaviors", {
         method: "DELETE",
@@ -120,6 +136,8 @@ export function useBehaviors(teacherId: string | null, behaviorType?: 'INDIVIDUA
       await fetchBehaviors();
     } catch (err) {
       throw err;
+    } finally {
+      setDeletingBehavior(false);
     }
   };
 
@@ -131,6 +149,9 @@ export function useBehaviors(teacherId: string | null, behaviorType?: 'INDIVIDUA
     behaviors,
     loading,
     error,
+    creatingBehavior,
+    updatingBehavior,
+    deletingBehavior,
     createBehavior,
     updateBehavior,
     deleteBehavior,

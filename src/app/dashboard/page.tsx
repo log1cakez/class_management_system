@@ -8,6 +8,7 @@ import { useStudents } from "@/hooks/useStudents";
 import { useSearchParams, useRouter } from "next/navigation";
 import GroupWorkModal from "@/components/GroupWorkModal";
 import { useGroupWorks } from "@/hooks/useGroupWorks";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
@@ -16,7 +17,7 @@ function DashboardContent() {
   const className = searchParams.get("className");
   const teacherId = searchParams.get("teacherId");
 
-  const { students, loading, error, createStudent } = useStudents(
+  const { students, loading, error, createStudent, creatingStudent } = useStudents(
     classId,
     teacherId
   );
@@ -26,7 +27,7 @@ function DashboardContent() {
   const [showRewardsModal, setShowRewardsModal] = useState(false);
   const [showGroupWorkModal, setShowGroupWorkModal] = useState(false);
 
-  const { createGroupWork } = useGroupWorks(teacherId);
+  const { createGroupWork, creatingGroupWork } = useGroupWorks(teacherId);
 
   const addStudent = async () => {
     if (newStudentName.trim()) {
@@ -161,9 +162,17 @@ function DashboardContent() {
             />
             <button
               onClick={addStudent}
-              className="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 text-yellow-800 font-bold rounded-lg border-2 border-white transition-all duration-200 hover:scale-105 shadow-lg"
+              disabled={creatingStudent}
+              className="px-6 py-3 bg-yellow-400 hover:bg-yellow-500 disabled:bg-gray-400 disabled:cursor-not-allowed text-yellow-800 font-bold rounded-lg border-2 border-white transition-all duration-200 hover:scale-105 shadow-lg flex items-center gap-2"
             >
-              Add
+              {creatingStudent ? (
+                <>
+                  <LoadingSpinner size="sm" />
+                  Adding...
+                </>
+              ) : (
+                "Add"
+              )}
             </button>
           </div>
         </div>
@@ -171,9 +180,7 @@ function DashboardContent() {
         {/* Loading State */}
         {loading && (
           <div className="flex justify-center items-center min-h-96">
-            <div className="text-2xl font-bold text-yellow-600">
-              Loading students...
-            </div>
+            <LoadingSpinner size="lg" text="Loading students..." />
           </div>
         )}
 

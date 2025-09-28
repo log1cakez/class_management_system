@@ -6,6 +6,7 @@ import GroupAwardModal from "./GroupAwardModal";
 import BadgeCelebrationModal from "./BadgeCelebrationModal";
 import { useGroupWorks } from "@/hooks/useGroupWorks";
 import { RewardBadge } from "@/assets/images/badges";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface GroupWorkDemoProps {
   teacherId: string | null;
@@ -13,7 +14,16 @@ interface GroupWorkDemoProps {
 }
 
 export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps) {
-  const { groupWorks, createGroupWork, updateGroupWork, deleteGroupWork, loading } = useGroupWorks(teacherId);
+  const { 
+    groupWorks, 
+    createGroupWork, 
+    updateGroupWork, 
+    deleteGroupWork, 
+    loading,
+    creatingGroupWork,
+    updatingGroupWork,
+    deletingGroupWork
+  } = useGroupWorks(teacherId);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showAwardModal, setShowAwardModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -21,9 +31,12 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
   const [earnedBadges, setEarnedBadges] = useState<RewardBadge[]>([]);
   const [selectedGroupWork, setSelectedGroupWork] = useState<any>(null);
   const [groupPoints, setGroupPoints] = useState<Record<string, Record<string, number>>>({});
+  const [loadingGroupPoints, setLoadingGroupPoints] = useState(false);
+  const [awardingPoints, setAwardingPoints] = useState(false);
 
   // Fetch group points for all group works
   const fetchGroupPoints = async (groupWorks: any[]) => {
+    setLoadingGroupPoints(true);
     try {
       const pointsData: Record<string, Record<string, number>> = {};
       
@@ -45,6 +58,8 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
       setGroupPoints(pointsData);
     } catch (error) {
       console.error("Error fetching group points:", error);
+    } finally {
+      setLoadingGroupPoints(false);
     }
   };
 
@@ -79,6 +94,7 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
     behaviorId: string;
     points: number;
   }[]) => {
+    setAwardingPoints(true);
     try {
       console.log("Awards to be given:", awards);
       
@@ -132,6 +148,8 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
     } catch (error) {
       console.error("Error awarding points:", error);
       alert("Failed to award points. Please try again.");
+    } finally {
+      setAwardingPoints(false);
     }
   };
 
@@ -189,24 +207,40 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Group Work Activities</h2>
         <button
           onClick={() => setShowCreateModal(true)}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105"
+          disabled={creatingGroupWork}
+          className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105 flex items-center gap-2"
         >
-          Create New Group Work
+          {creatingGroupWork ? (
+            <>
+              <LoadingSpinner size="sm" />
+              Creating...
+            </>
+          ) : (
+            "Create New Group Work"
+          )}
         </button>
       </div>
 
       {loading ? (
         <div className="text-center py-8">
-          <div className="text-lg text-gray-600">Loading group works...</div>
+          <LoadingSpinner size="lg" text="Loading group works..." />
         </div>
       ) : groupWorks.length === 0 ? (
         <div className="text-center py-8">
           <div className="text-lg text-gray-600 mb-4">No group works created yet.</div>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105"
+            disabled={creatingGroupWork}
+            className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105 flex items-center gap-2"
           >
-            Create Your First Group Work
+            {creatingGroupWork ? (
+              <>
+                <LoadingSpinner size="sm" />
+                Creating...
+              </>
+            ) : (
+              "Create Your First Group Work"
+            )}
           </button>
         </div>
       ) : (
@@ -251,21 +285,45 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
               <div className="flex gap-2">
                 <button
                   onClick={() => openAwardModal(groupWork)}
-                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm"
+                  disabled={awardingPoints || loadingGroupPoints}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm flex items-center justify-center gap-1"
                 >
-                  Award Points
+                  {awardingPoints ? (
+                    <>
+                      <LoadingSpinner size="sm" />
+                      Awarding...
+                    </>
+                  ) : (
+                    "Award Points"
+                  )}
                 </button>
                 <button
                   onClick={() => openEditModal(groupWork)}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm"
+                  disabled={updatingGroupWork}
+                  className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm flex items-center justify-center gap-1"
                 >
-                  Edit
+                  {updatingGroupWork ? (
+                    <>
+                      <LoadingSpinner size="sm" />
+                      Updating...
+                    </>
+                  ) : (
+                    "Edit"
+                  )}
                 </button>
                 <button
                   onClick={() => handleDeleteGroupWork(groupWork.id)}
-                  className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm"
+                  disabled={deletingGroupWork}
+                  className="bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm flex items-center justify-center gap-1"
                 >
-                  Delete
+                  {deletingGroupWork ? (
+                    <>
+                      <LoadingSpinner size="sm" />
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete"
+                  )}
                 </button>
               </div>
             </div>

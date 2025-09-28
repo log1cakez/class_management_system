@@ -62,6 +62,9 @@ export function useGroupWorks(teacherId: string | null) {
   const [groupWorks, setGroupWorks] = useState<GroupWork[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [creatingGroupWork, setCreatingGroupWork] = useState(false);
+  const [updatingGroupWork, setUpdatingGroupWork] = useState(false);
+  const [deletingGroupWork, setDeletingGroupWork] = useState(false);
 
   const fetchGroupWorks = useCallback(async () => {
     if (!teacherId) return;
@@ -89,6 +92,9 @@ export function useGroupWorks(teacherId: string | null) {
   const createGroupWork = async (data: CreateGroupWorkData & { behaviorNames?: Record<string, string>; behaviorPraises?: Record<string, string> }) => {
     if (!teacherId) throw new Error("No teacher ID");
     
+    setCreatingGroupWork(true);
+    setError(null);
+
     try {
       const requestData = {
         ...data,
@@ -118,12 +124,17 @@ export function useGroupWorks(teacherId: string | null) {
       return newGroupWork;
     } catch (err) {
       throw err;
+    } finally {
+      setCreatingGroupWork(false);
     }
   };
 
   const updateGroupWork = async (id: string, data: Partial<CreateGroupWorkData & { behaviorNames?: Record<string, string>; behaviorPraises?: Record<string, string> }>) => {
     if (!teacherId) throw new Error("No teacher ID");
     
+    setUpdatingGroupWork(true);
+    setError(null);
+
     try {
       const response = await fetch(`/api/group-works/${id}`, {
         method: "PUT",
@@ -149,12 +160,17 @@ export function useGroupWorks(teacherId: string | null) {
       return updatedGroupWork;
     } catch (err) {
       throw err;
+    } finally {
+      setUpdatingGroupWork(false);
     }
   };
 
   const deleteGroupWork = async (id: string) => {
     if (!teacherId) throw new Error("No teacher ID");
     
+    setDeletingGroupWork(true);
+    setError(null);
+
     try {
       const response = await fetch(`/api/group-works/${id}?teacherId=${teacherId}`, {
         method: "DELETE",
@@ -171,6 +187,8 @@ export function useGroupWorks(teacherId: string | null) {
       return { success: true };
     } catch (err) {
       throw err;
+    } finally {
+      setDeletingGroupWork(false);
     }
   };
 
@@ -182,6 +200,9 @@ export function useGroupWorks(teacherId: string | null) {
     groupWorks,
     loading,
     error,
+    creatingGroupWork,
+    updatingGroupWork,
+    deletingGroupWork,
     createGroupWork,
     updateGroupWork,
     deleteGroupWork,

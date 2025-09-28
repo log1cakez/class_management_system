@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { IMAGES } from "@/assets/images/config";
 import { useBehaviors } from "@/hooks/useBehaviors";
+import LoadingSpinner from "./LoadingSpinner";
 
 interface Behavior {
   id: string;
@@ -34,6 +35,9 @@ export default function BehaviorSelectionModal({
     createBehavior,
     updateBehavior,
     deleteBehavior,
+    creatingBehavior,
+    updatingBehavior,
+    deletingBehavior,
   } = useBehaviors(teacherId, behaviorType);
 
   const [behaviors, setBehaviors] = useState<Behavior[]>([]);
@@ -181,9 +185,17 @@ export default function BehaviorSelectionModal({
                   />
                   <button
                     onClick={handleAddBehavior}
-                    className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105"
+                    disabled={creatingBehavior}
+                    className="bg-green-500 hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 flex items-center gap-2"
                   >
-                    Add
+                    {creatingBehavior ? (
+                      <>
+                        <LoadingSpinner size="sm" />
+                        Adding...
+                      </>
+                    ) : (
+                      "Add"
+                    )}
                   </button>
                 </div>
               )}
@@ -218,9 +230,17 @@ export default function BehaviorSelectionModal({
                         />
                         <button
                           onClick={() => handleEditBehavior(behavior.id)}
-                          className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:scale-105"
+                          disabled={updatingBehavior}
+                          className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:scale-105 flex items-center gap-1"
                         >
-                          Save
+                          {updatingBehavior ? (
+                            <>
+                              <LoadingSpinner size="sm" />
+                              Saving...
+                            </>
+                          ) : (
+                            "Save"
+                          )}
                         </button>
                         <button
                           onClick={() => setShowEditForm(null)}
@@ -256,10 +276,15 @@ export default function BehaviorSelectionModal({
                             </button>
                             <button
                               onClick={() => handleDeleteBehavior(behavior.id)}
-                              className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm font-semibold transition-all duration-200 hover:scale-105"
+                              disabled={deletingBehavior}
+                              className="bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-2 py-1 rounded text-sm font-semibold transition-all duration-200 hover:scale-105 flex items-center gap-1"
                               title="Delete behavior"
                             >
-                              🗑️
+                              {deletingBehavior ? (
+                                <LoadingSpinner size="sm" />
+                              ) : (
+                                "🗑️"
+                              )}
                             </button>
                           </div>
                         )}

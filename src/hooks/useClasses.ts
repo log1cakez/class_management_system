@@ -10,6 +10,8 @@ export function useClasses(teacherId: string | null) {
   const [classes, setClasses] = useState<Class[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [creatingClass, setCreatingClass] = useState(false);
+  const [deletingClass, setDeletingClass] = useState(false);
 
   const fetchClasses = useCallback(async () => {
     if (!teacherId) return;
@@ -34,6 +36,9 @@ export function useClasses(teacherId: string | null) {
   const createClass = async (name: string) => {
     if (!teacherId) throw new Error("No teacher ID");
     
+    setCreatingClass(true);
+    setError(null);
+
     try {
       const response = await fetch("/api/classes", {
         method: "POST",
@@ -54,10 +59,15 @@ export function useClasses(teacherId: string | null) {
       setClasses((prev) => [...prev, newClass]);
     } catch (err) {
       throw err;
+    } finally {
+      setCreatingClass(false);
     }
   };
 
   const deleteClass = async (classId: string) => {
+    setDeletingClass(true);
+    setError(null);
+
     try {
       const response = await fetch(`/api/classes/${classId}?teacherId=${teacherId}`, {
         method: "DELETE",
@@ -70,6 +80,8 @@ export function useClasses(teacherId: string | null) {
       setClasses((prev) => prev.filter((c) => c.id !== classId));
     } catch (err) {
       throw err;
+    } finally {
+      setDeletingClass(false);
     }
   };
 
@@ -81,6 +93,8 @@ export function useClasses(teacherId: string | null) {
     classes,
     loading,
     error,
+    creatingClass,
+    deletingClass,
     createClass,
     deleteClass,
     refetch: fetchClasses,

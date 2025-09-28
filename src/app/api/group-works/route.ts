@@ -37,6 +37,16 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    console.log("Fetched group works:", groupWorks.map(gw => ({
+      id: gw.id,
+      name: gw.name,
+      behaviors: gw.behaviors.map(b => ({
+        behaviorId: b.behaviorId,
+        behaviorName: b.behavior.name,
+        praise: b.praise
+      }))
+    })));
+
     return NextResponse.json(groupWorks);
   } catch (error) {
     console.error("Error fetching group works:", error);
@@ -53,13 +63,14 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { name, classId, behaviorIds, groups, teacherId, behaviorPraises } = body;
 
-    console.log("Received data:", { name, classId, behaviorIds, groups, teacherId });
+    console.log("Received data:", { name, classId, behaviorIds, groups, teacherId, behaviorPraises });
     console.log("Field validation:", {
       hasName: !!name,
       hasClassId: !!classId,
       hasBehaviorIds: !!behaviorIds,
       hasGroups: !!groups,
-      hasTeacherId: !!teacherId
+      hasTeacherId: !!teacherId,
+      hasBehaviorPraises: !!behaviorPraises
     });
 
     if (!teacherId) {
@@ -123,6 +134,7 @@ export async function POST(request: NextRequest) {
       groupsCount: groups.length,
       behaviorsCount: behaviorIds.length,
       behaviorIds,
+      behaviorPraises,
       groups: groups.map(g => ({ name: g.name, studentIds: g.studentIds }))
     });
 
@@ -168,6 +180,11 @@ export async function POST(request: NextRequest) {
     });
 
     console.log("Group work created successfully:", groupWork.id);
+    console.log("Created group work behaviors:", groupWork.behaviors.map(b => ({
+      behaviorId: b.behaviorId,
+      behaviorName: b.behavior.name,
+      praise: b.praise
+    })));
 
     return NextResponse.json(groupWork);
   } catch (error) {

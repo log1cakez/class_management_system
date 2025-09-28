@@ -37,6 +37,9 @@ export function useGroupPoints(groupId: string | null) {
   const [groupPoints, setGroupPoints] = useState<GroupPoint[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [awardingPoints, setAwardingPoints] = useState(false);
+  const [updatingPoint, setUpdatingPoint] = useState(false);
+  const [deletingPoint, setDeletingPoint] = useState(false);
 
   const fetchGroupPoints = useCallback(async () => {
     if (!groupId) return;
@@ -59,6 +62,9 @@ export function useGroupPoints(groupId: string | null) {
   }, [groupId]);
 
   const awardGroupPoints = async (data: AwardGroupPointsData) => {
+    setAwardingPoints(true);
+    setError(null);
+
     try {
       const response = await fetch("/api/group-points", {
         method: "POST",
@@ -79,6 +85,8 @@ export function useGroupPoints(groupId: string | null) {
       return newGroupPoint;
     } catch (err) {
       throw err;
+    } finally {
+      setAwardingPoints(false);
     }
   };
 
@@ -93,6 +101,9 @@ export function useGroupPoints(groupId: string | null) {
   };
 
   const updateGroupPoint = async (id: string, data: Partial<AwardGroupPointsData>) => {
+    setUpdatingPoint(true);
+    setError(null);
+
     try {
       const response = await fetch("/api/group-points", {
         method: "PUT",
@@ -116,10 +127,15 @@ export function useGroupPoints(groupId: string | null) {
       return updatedGroupPoint;
     } catch (err) {
       throw err;
+    } finally {
+      setUpdatingPoint(false);
     }
   };
 
   const deleteGroupPoint = async (id: string) => {
+    setDeletingPoint(true);
+    setError(null);
+
     try {
       const response = await fetch("/api/group-points", {
         method: "DELETE",
@@ -138,6 +154,8 @@ export function useGroupPoints(groupId: string | null) {
       await fetchGroupPoints();
     } catch (err) {
       throw err;
+    } finally {
+      setDeletingPoint(false);
     }
   };
 
@@ -149,6 +167,9 @@ export function useGroupPoints(groupId: string | null) {
     groupPoints,
     loading,
     error,
+    awardingPoints,
+    updatingPoint,
+    deletingPoint,
     awardGroupPoints,
     awardMultipleGroupPoints,
     updateGroupPoint,

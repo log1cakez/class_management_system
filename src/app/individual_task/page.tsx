@@ -8,6 +8,7 @@ import BehaviorSelectionModal from "@/components/BehaviorSelectionModal";
 import ComplimentModal from "@/components/ComplimentModal";
 import { useStudents } from "@/hooks/useStudents";
 import { useSearchParams } from "next/navigation";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 function IndividualTaskContent() {
   const searchParams = useSearchParams();
@@ -20,6 +21,7 @@ function IndividualTaskContent() {
     error,
     addPointsToStudents,
     toggleStudentSelection,
+    addingPoints,
   } = useStudents(classId, teacherId);
 
   const [isBehaviorModalOpen, setIsBehaviorModalOpen] = useState(false);
@@ -148,9 +150,7 @@ function IndividualTaskContent() {
         {/* Loading State */}
         {loading && (
           <div className="flex justify-center items-center min-h-96">
-            <div className="text-2xl font-bold text-yellow-600">
-              Loading students...
-            </div>
+            <LoadingSpinner size="lg" text="Loading students..." />
           </div>
         )}
 
@@ -231,16 +231,26 @@ function IndividualTaskContent() {
         <div className="fixed bottom-8 right-8 z-20">
           <button
             onClick={handleNextClick}
-            className="bg-amber-800 hover:bg-amber-900 text-white font-bold py-4 px-8 rounded-lg shadow-lg border-2 border-amber-900 transition-all duration-200 hover:scale-105 flex items-center gap-3"
+            disabled={addingPoints}
+            className="bg-amber-800 hover:bg-amber-900 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-4 px-8 rounded-lg shadow-lg border-2 border-amber-900 transition-all duration-200 hover:scale-105 flex items-center gap-3"
           >
-            <span className="text-lg">NEXT</span>
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-              <path
-                fillRule="evenodd"
-                d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
+            {addingPoints ? (
+              <>
+                <LoadingSpinner size="sm" />
+                <span className="text-lg">Processing...</span>
+              </>
+            ) : (
+              <>
+                <span className="text-lg">NEXT</span>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fillRule="evenodd"
+                    d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </>
+            )}
           </button>
         </div>
       </div>

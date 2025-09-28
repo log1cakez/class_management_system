@@ -102,6 +102,9 @@ export default function GroupWorkModal({
   // Populate form when editing
   useEffect(() => {
     if (initialData && isOpen) {
+      console.log('Loading initial data for editing:', initialData);
+      console.log('Initial data behaviors:', initialData.behaviors);
+      
       setActivityName(initialData.name || "");
       
       // Transform groups to match expected structure
@@ -132,10 +135,12 @@ export default function GroupWorkModal({
         const existingPraises: Record<string, string> = {};
         initialData.behaviors.forEach((behavior: any) => {
           const behaviorId = behavior.behaviorId || behavior.id;
+          console.log('Processing behavior:', { behaviorId, behavior, praise: behavior.praise });
           if (behavior.praise) {
             existingPraises[behaviorId] = behavior.praise;
           }
         });
+        console.log('Loaded existing praises:', existingPraises);
         setBehaviorPraises(existingPraises);
       }
     } else if (isOpen && !initialData) {
@@ -147,6 +152,9 @@ export default function GroupWorkModal({
 
 
   const toggleBehavior = (id: string) => {
+    const behavior = behaviors.find(b => b.id === id);
+    const isCurrentlySelected = behavior?.isSelected || false;
+    
     setBehaviors(
       behaviors.map((behavior) =>
         behavior.id === id
@@ -154,6 +162,15 @@ export default function GroupWorkModal({
           : behavior
       )
     );
+    
+    // If deselecting a behavior, remove its praise message
+    if (isCurrentlySelected && behaviorPraises[id]) {
+      setBehaviorPraises(prev => {
+        const newPraises = { ...prev };
+        delete newPraises[id];
+        return newPraises;
+      });
+    }
   };
 
   const toggleStudent = (id: string) => {
@@ -274,6 +291,17 @@ export default function GroupWorkModal({
 
     if (groups.length === 0) {
       alert("Please create at least one group");
+      return;
+    }
+
+    // Check if all selected behaviors have praise messages
+    const behaviorsWithoutPraise = selectedBehaviors.filter(behavior => 
+      !behaviorPraises[behavior.id] || behaviorPraises[behavior.id].trim() === ''
+    );
+
+    if (behaviorsWithoutPraise.length > 0) {
+      const behaviorNames = behaviorsWithoutPraise.map(b => b.name).join(', ');
+      alert(`Please add praise messages for the following behaviors: ${behaviorNames}`);
       return;
     }
 
@@ -444,14 +472,51 @@ export default function GroupWorkModal({
                       </button>
                     </div>
                     
-                    {behavior.isSelected && behaviorPraises[behavior.id] && (
+                    {behavior.isSelected && (
                       <div className="mt-2">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Praise message for {behavior.name}:
                         </label>
-                        <div className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
-                          {behaviorPraises[behavior.id]}
-                        </div>
+                        {behaviorPraises[behavior.id] ? (
+                          <div className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
+                            {behaviorPraises[behavior.id]}
+                          </div>
+                        ) : (
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              placeholder="Enter praise message for this behavior... (Required)"
+                              className="flex-1 px-3 py-2 text-black border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm"
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  const input = e.target as HTMLInputElement;
+                                  if (input.value.trim()) {
+                                    setBehaviorPraises(prev => ({
+                                      ...prev,
+                                      [behavior.id]: input.value.trim()
+                                    }));
+                                    input.value = '';
+                                  }
+                                }
+                              }}
+                            />
+                            <button
+                              onClick={(e) => {
+                                const input = e.currentTarget.previousElementSibling as HTMLInputElement;
+                                if (input.value.trim()) {
+                                  setBehaviorPraises(prev => ({
+                                    ...prev,
+                                    [behavior.id]: input.value.trim()
+                                  }));
+                                  input.value = '';
+                                }
+                              }}
+                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:scale-105"
+                            >
+                              Add
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

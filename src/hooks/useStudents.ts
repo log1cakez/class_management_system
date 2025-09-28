@@ -14,6 +14,8 @@ export function useStudents(classId: string | null, teacherId: string | null) {
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [addingPoints, setAddingPoints] = useState(false)
+  const [creatingStudent, setCreatingStudent] = useState(false)
 
   const fetchStudents = useCallback(async () => {
     if (!classId || !teacherId) return
@@ -39,6 +41,9 @@ export function useStudents(classId: string | null, teacherId: string | null) {
 
   const addPointsToStudents = async (studentIds: string[], pointsToAdd: number, reason: string, behavior?: string) => {
     if (!teacherId) throw new Error('Teacher ID is required')
+
+    setAddingPoints(true)
+    setError(null)
 
     try {
       const response = await fetch('/api/students', {
@@ -89,6 +94,8 @@ export function useStudents(classId: string | null, teacherId: string | null) {
       console.error('Error in addPointsToStudents:', err)
       setError(err instanceof Error ? err.message : 'An error occurred')
       throw err
+    } finally {
+      setAddingPoints(false)
     }
   }
 
@@ -104,6 +111,9 @@ export function useStudents(classId: string | null, teacherId: string | null) {
 
   const createStudent = async (name: string) => {
     if (!classId || !teacherId) throw new Error('Class ID and Teacher ID are required')
+
+    setCreatingStudent(true)
+    setError(null)
 
     try {
       const response = await fetch('/api/students', {
@@ -128,6 +138,8 @@ export function useStudents(classId: string | null, teacherId: string | null) {
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
       throw err
+    } finally {
+      setCreatingStudent(false)
     }
   }
 
@@ -139,6 +151,8 @@ export function useStudents(classId: string | null, teacherId: string | null) {
     students,
     loading,
     error,
+    addingPoints,
+    creatingStudent,
     addPointsToStudents,
     toggleStudentSelection,
     createStudent,

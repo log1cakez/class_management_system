@@ -48,6 +48,12 @@ export async function POST(request: NextRequest) {
       const groupWorkBehavior = group.groupWork.behaviors.find(
         (gb: any) => gb.behaviorId === behaviorId
       )
+      console.log('Group work behaviors:', group.groupWork.behaviors.map((gb: any) => ({
+        behaviorId: gb.behaviorId,
+        behaviorName: gb.behavior.name,
+        praise: gb.praise
+      })))
+      console.log('Found group work behavior:', groupWorkBehavior)
       predefinedPraise = groupWorkBehavior?.praise
       console.log('Predefined praise:', predefinedPraise)
     }
