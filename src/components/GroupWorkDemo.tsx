@@ -305,7 +305,7 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
         onConfirm={handleEditGroupWork}
         teacherId={teacherId}
         classId={classId}
-        initialData={selectedGroupWork}
+        initialData={selectedGroupWork || undefined}
       />
 
       <GroupAwardModal
