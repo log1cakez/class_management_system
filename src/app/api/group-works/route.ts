@@ -1,0 +1,210 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+// GET /api/group-works - Get all group works for a teacher
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const teacherId = searchParams.get("teacherId");
+
+    if (!teacherId) {
+      return NextResponse.json({ error: "Teacher ID is required" }, { status: 400 });
+    }
+
+    const groupWorks = await prisma.groupWork.findMany({
+      where: {
+        teacherId: teacherId,
+      },
+      include: {
+        class: true,
+        groups: {
+          include: {
+            students: {
+              include: {
+                student: true,
+              },
+            },
+          },
+        },
+        behaviors: {
+          include: {
+            behavior: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return NextResponse.json(groupWorks);
+  } catch (error) {
+    console.error("Error fetching group works:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch group works" },
+      { status: 500 }
+    );
+  }
+}
+
+// POST /api/group-works - Create a new group work
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+    const { name, classId, behaviorIds, groups, teacherId, behaviorPraises } = body;
+
+
+    if (!teacherId) {
+      return NextResponse.json({ error: "Teacher ID is required" }, { status: 400 });
+    }
+
+    if (!name || !classId || !behaviorIds || !groups) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // Verify the class belongs to the teacher
+    const classExists = await prisma.class.findFirst({
+      where: {
+        id: classId,
+        teacherId: teacherId,
+      },
+    });
+
+    if (!classExists) {
+      return NextResponse.json(
+        { error: "Class not found or access denied" },
+        { status: 404 }
+      );
+    }
+
+    // Validate that all behavior IDs exist, belong to the teacher, and are GROUP_WORK behaviors
+    const validBehaviors = await prisma.behavior.findMany({
+      where: {
+        id: { in: behaviorIds },
+        behaviorType: 'GROUP_WORK', // Only allow GROUP_WORK behaviors
+        OR: [
+          { teacherId: teacherId },
+          { isDefault: true }
+        ]
+      },
+      select: { id: true, name: true }
+    });
+
+    
+    if (validBehaviors.length !== behaviorIds.length) {
+      const invalidIds = behaviorIds.filter(id => !validBehaviors.some(b => b.id === id));
+      return NextResponse.json(
+        { error: `Invalid behavior IDs: ${invalidIds.join(', ')}` },
+        { status: 400 }
+      );
+    }
+
+    // Create the group work with all related data
+
+    const groupWork = await prisma.groupWork.create({
+      data: {
+        name,
+        classId,
+        teacherId,
+        groups: {
+          create: groups.map((group: any) => ({
+            name: group.name,
+            students: {
+              create: group.studentIds.map((studentId: string) => ({
+                studentId,
+              })),
+            },
+          })),
+        },
+        behaviors: {
+          create: behaviorIds.map((behaviorId: string) => ({
+            behaviorId,
+            praise: behaviorPraises?.[behaviorId] || null,
+          })),
+        },
+      },
+      include: {
+        class: true,
+        groups: {
+          include: {
+            students: {
+              include: {
+                student: true,
+              },
+            },
+          },
+        },
+        behaviors: {
+          include: {
+            behavior: true,
+          },
+        },
+      },
+    });
+
+
+    return NextResponse.json(groupWork);
+  } catch (error) {
+    
+    // Provide more specific error messages
+    let errorMessage = "Failed to create group work";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    
+    return NextResponse.json(
+      { error: errorMessage },
+      { status: 500 }
+    );
+  }
+}
+
+// DELETE /api/group-works - Delete a group work
+export async function DELETE(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get("id");
+    const teacherId = searchParams.get("teacherId");
+
+    if (!teacherId) {
+      return NextResponse.json({ error: "Teacher ID is required" }, { status: 400 });
+    }
+
+    if (!id) {
+      return NextResponse.json({ error: "Missing group work ID" }, { status: 400 });
+    }
+
+    // Verify the group work belongs to the teacher
+    const groupWork = await prisma.groupWork.findFirst({
+      where: {
+        id: id,
+        teacherId: teacherId,
+      },
+    });
+
+    if (!groupWork) {
+      return NextResponse.json(
+        { error: "Group work not found or access denied" },
+        { status: 404 }
+      );
+    }
+
+    // Delete the group work (cascade will handle related records)
+    await prisma.groupWork.delete({
+      where: {
+        id: id,
+      },
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("Error deleting group work:", error);
+    return NextResponse.json(
+      { error: "Failed to delete group work" },
+      { status: 500 }
+    );
+  }
+}

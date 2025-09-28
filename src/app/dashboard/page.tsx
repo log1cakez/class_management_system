@@ -5,10 +5,13 @@ import Image from "next/image";
 import { DUCK_ICONS, IMAGES } from "@/assets/images/config";
 import NavigationButtons from "@/components/NavigationButtons";
 import { useStudents } from "@/hooks/useStudents";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
+import GroupWorkModal from "@/components/GroupWorkModal";
+import { useGroupWorks } from "@/hooks/useGroupWorks";
 
 function DashboardContent() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const classId = searchParams.get("classId");
   const className = searchParams.get("className");
   const teacherId = searchParams.get("teacherId");
@@ -21,6 +24,9 @@ function DashboardContent() {
   const [newStudentName, setNewStudentName] = useState("");
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showRewardsModal, setShowRewardsModal] = useState(false);
+  const [showGroupWorkModal, setShowGroupWorkModal] = useState(false);
+
+  const { createGroupWork } = useGroupWorks(teacherId);
 
   const addStudent = async () => {
     if (newStudentName.trim()) {
@@ -40,13 +46,39 @@ function DashboardContent() {
     console.log("Remove student:", id);
   };
 
+  const handleGroupWorkRedirect = () => {
+    const params = new URLSearchParams();
+    if (classId) params.set("classId", classId);
+    if (className) params.set("className", className);
+    if (teacherId) params.set("teacherId", teacherId);
+
+    router.push(`/groupwork-dashboard?${params.toString()}`);
+  };
+
+  const handleCreateGroupWork = async (data: {
+    name: string;
+    behaviorIds: string[];
+    groups: {
+      name: string;
+      studentIds: string[];
+    }[];
+  }) => {
+    try {
+      await createGroupWork(data);
+      setShowGroupWorkModal(false);
+      alert("Group work activity created successfully!");
+    } catch (error) {
+      console.error("Error creating group work:", error);
+      alert("Failed to create group work. Please try again.");
+    }
+  };
+
   return (
     <main className="min-h-screen relative overflow-hidden">
       {/* Background Image */}
       <div
-        className={`absolute inset-0 z-0 transition-all duration-300 ${
-          showTaskModal || showRewardsModal ? "blur-sm" : ""
-        }`}
+        className={`absolute inset-0 z-0 transition-all duration-300 ${showTaskModal || showRewardsModal || showGroupWorkModal ? "blur-sm" : ""
+          }`}
       >
         <Image
           src={IMAGES.HOMEPAGE_BG}
@@ -63,9 +95,8 @@ function DashboardContent() {
 
       {/* Content Overlay */}
       <div
-        className={`relative z-10 min-h-screen p-8 transition-all duration-300 ${
-          showTaskModal || showRewardsModal ? "blur-sm" : ""
-        }`}
+        className={`relative z-10 min-h-screen p-8 transition-all duration-300 ${showTaskModal || showRewardsModal ? "blur-sm" : ""
+          }`}
       >
         {/* Header Section */}
         <div className="flex justify-between items-center mb-8">
@@ -194,16 +225,16 @@ function DashboardContent() {
                   <Image
                     src={
                       student.points >= 30
-                        ? DUCK_ICONS.DUCK_5
+                        ? DUCK_ICONS.DUCK_6
                         : student.points >= 25
-                        ? DUCK_ICONS.DUCK_4
-                        : student.points >= 20
-                        ? DUCK_ICONS.DUCK_3
-                        : student.points >= 10
-                        ? DUCK_ICONS.DUCK_2
-                        : student.points >= 5
-                        ? DUCK_ICONS.DUCK_1
-                        : DUCK_ICONS.DUCK_1
+                          ? DUCK_ICONS.DUCK_5
+                          : student.points >= 20
+                            ? DUCK_ICONS.DUCK_4
+                            : student.points >= 10
+                              ? DUCK_ICONS.DUCK_3
+                              : student.points >= 5
+                                ? DUCK_ICONS.DUCK_2
+                                : DUCK_ICONS.DUCK_1
                     }
                     alt={`duck level ${Math.floor(student.points / 25) + 1}`}
                     width={500}
@@ -259,11 +290,10 @@ function DashboardContent() {
                 className="bg-pink-400 hover:bg-pink-500 rounded-2xl p-6 cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg border-2 border-pink-500 min-w-[200px] text-center"
                 onClick={() => {
                   setShowTaskModal(false);
-                  window.location.href = `/individual_task${
-                    classId && teacherId
-                      ? `?classId=${classId}&teacherId=${teacherId}`
-                      : ""
-                  }`;
+                  window.location.href = `/individual_task${classId && teacherId
+                    ? `?classId=${classId}&teacherId=${teacherId}`
+                    : ""
+                    }`;
                 }}
               >
                 <div className="text-2xl font-bold text-white mb-2">
@@ -280,13 +310,13 @@ function DashboardContent() {
                 className="bg-blue-500 hover:bg-blue-600 rounded-2xl p-6 cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg border-2 border-blue-600 min-w-[200px] text-center"
                 onClick={() => {
                   setShowTaskModal(false);
-                  // TODO: Handle group work logic
+                  handleGroupWorkRedirect();
                 }}
               >
                 <div className="text-2xl font-bold text-white mb-2">Group</div>
                 <div className="text-xl font-bold text-white">Work</div>
                 <div className="text-sm text-blue-100 mt-2">
-                  Assign points to multiple students
+                  Manage group work activities
                 </div>
               </div>
             </div>
@@ -416,6 +446,15 @@ function DashboardContent() {
           </div>
         </div>
       )}
+
+      {/* Group Work Modal */}
+      <GroupWorkModal
+        isOpen={showGroupWorkModal}
+        onClose={() => setShowGroupWorkModal(false)}
+        onConfirm={handleCreateGroupWork}
+        teacherId={teacherId}
+        classId={classId || undefined}
+      />
     </main>
   );
 }

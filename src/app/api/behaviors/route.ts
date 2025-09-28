@@ -1,62 +1,62 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
-// GET /api/behaviors?teacherId=xxx - Get all behaviors for a teacher (including default behaviors)
+// GET /api/behaviors?teacherId=xxx&type=GROUP_WORK - Get behaviors for a teacher, optionally filtered by type
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const teacherId = searchParams.get('teacherId')
+    const behaviorType = searchParams.get('type') // 'INDIVIDUAL' or 'GROUP_WORK'
 
     if (!teacherId) {
       return NextResponse.json({ error: 'Teacher ID is required' }, { status: 400 })
     }
 
-    // Get teacher's custom behaviors
-    const customBehaviors = await prisma.behavior.findMany({
-      where: { 
-        teacherId,
-        isDefault: false
-      },
-      orderBy: { createdAt: 'desc' }
-    })
-
-    // Get default behaviors (from default teacher)
-    const defaultTeacher = await prisma.teacher.findUnique({
-      where: { email: 'default@teacher.com' }
-    })
-
-    let defaultBehaviors = []
-    if (defaultTeacher) {
-      defaultBehaviors = await prisma.behavior.findMany({
-        where: { 
-          teacherId: defaultTeacher.id,
-          isDefault: true
-        },
-        orderBy: { createdAt: 'asc' }
-      })
+    // Build where clause
+    const whereClause: any = { 
+      teacherId
     }
 
-    // Combine default and custom behaviors (defaults first)
-    const allBehaviors = [...defaultBehaviors, ...customBehaviors]
+    // Add behavior type filter if specified
+    if (behaviorType && (behaviorType === 'INDIVIDUAL' || behaviorType === 'GROUP_WORK')) {
+      whereClause.behaviorType = behaviorType
+    }
 
-    return NextResponse.json(allBehaviors)
+    // Get behaviors for this teacher (including copied defaults and custom behaviors)
+    const behaviors = await prisma.behavior.findMany({
+      where: whereClause,
+      orderBy: { createdAt: 'asc' } // Order by creation date - copied defaults will be first since they're created during registration
+    })
+
+    return NextResponse.json(behaviors)
   } catch (error) {
-    console.error('Error fetching behaviors:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
 // POST /api/behaviors - Create a new behavior
 export async function POST(request: NextRequest) {
+  let name: string | undefined
+  let teacherId: string | undefined
+  let behaviorType: string | undefined
+  
   try {
     const body = await request.json()
-    const { name, teacherId } = body
+    const parsed = body
+    name = parsed.name
+    teacherId = parsed.teacherId
+    behaviorType = parsed.behaviorType || 'INDIVIDUAL' // Default to INDIVIDUAL
 
-    console.log('Creating behavior with data:', { name, teacherId })
+    console.log('Creating behavior with data:', { name, teacherId, behaviorType })
 
     if (!name || !teacherId) {
       console.log('Missing required fields:', { name: !!name, teacherId: !!teacherId })
       return NextResponse.json({ error: 'Name and teacherId are required' }, { status: 400 })
+    }
+
+    // Validate behavior type
+    if (behaviorType !== 'INDIVIDUAL' && behaviorType !== 'GROUP_WORK') {
+      return NextResponse.json({ error: 'Invalid behavior type. Must be INDIVIDUAL or GROUP_WORK' }, { status: 400 })
     }
 
     // Verify teacher exists
@@ -75,20 +75,13 @@ export async function POST(request: NextRequest) {
     const newBehavior = await prisma.behavior.create({
       data: {
         name,
-        teacherId
+        teacherId,
+        behaviorType: (behaviorType || 'INDIVIDUAL') as 'INDIVIDUAL' | 'GROUP_WORK'
       }
     })
 
-    console.log('Behavior created successfully:', newBehavior.id)
     return NextResponse.json(newBehavior, { status: 201 })
   } catch (error) {
-    console.error('Error creating behavior:', error)
-    console.error('Error details:', {
-      message: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined,
-      name,
-      teacherId
-    })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -127,7 +120,6 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(updatedBehavior)
   } catch (error) {
-    console.error('Error updating behavior:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -145,19 +137,24 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Behavior ID and teacherId are required' }, { status: 400 })
     }
 
-    // First verify the behavior exists and belongs to this teacher
-    const existingBehavior = await prisma.behavior.findFirst({
-      where: { 
-        id,
-        teacherId // Ensure teacher owns this behavior
-      }
+    // First verify the behavior exists
+    const existingBehavior = await prisma.behavior.findUnique({
+      where: { id }
     })
 
     if (!existingBehavior) {
-      return NextResponse.json({ error: 'Behavior not found or access denied' }, { status: 404 })
+      return NextResponse.json({ error: 'Behavior not found' }, { status: 404 })
     }
 
-    // Allow deletion of all behaviors (including default ones)
+    // Prevent deletion of default behaviors by regular teachers
+    if (existingBehavior.isDefault) {
+      return NextResponse.json({ error: 'Cannot delete default behaviors' }, { status: 403 })
+    }
+
+    // For custom behaviors, ensure the teacher owns them
+    if (existingBehavior.teacherId !== teacherId) {
+      return NextResponse.json({ error: 'Access denied - you can only delete your own custom behaviors' }, { status: 403 })
+    }
 
     // Delete the behavior
     await prisma.behavior.delete({
@@ -166,7 +163,6 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ message: 'Behavior deleted successfully' })
   } catch (error) {
-    console.error('Error deleting behavior:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

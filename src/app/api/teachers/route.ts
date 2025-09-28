@@ -34,6 +34,33 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    // Copy default behaviors to the new teacher
+    const defaultTeacher = await prisma.teacher.findUnique({
+      where: { email: 'default@teacher.com' }
+    })
+
+    if (defaultTeacher) {
+      const defaultBehaviors = await prisma.behavior.findMany({
+        where: { 
+          teacherId: defaultTeacher.id,
+          isDefault: true
+        }
+      })
+
+      // Create copies of default behaviors for the new teacher
+      for (const defaultBehavior of defaultBehaviors) {
+        await prisma.behavior.create({
+          data: {
+            name: defaultBehavior.name,
+            praise: defaultBehavior.praise,
+            teacherId: teacher.id,
+            isDefault: false, // These are copies, not the original defaults
+            behaviorType: defaultBehavior.behaviorType
+          }
+        })
+      }
+    }
+
     // Generate JWT token
     const token = jwt.sign(
       { teacherId: teacher.id, email: teacher.email },
@@ -51,7 +78,6 @@ export async function POST(request: NextRequest) {
       token 
     }, { status: 201 })
   } catch (error) {
-    console.error('Error registering teacher:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -99,7 +125,6 @@ export async function PUT(request: NextRequest) {
       token
     })
   } catch (error) {
-    console.error('Error logging in teacher:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

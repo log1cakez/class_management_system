@@ -19,6 +19,7 @@ interface BehaviorSelectionModalProps {
   onConfirm: (selectedBehaviors: Array<{ id: string; name: string }>) => void;
   selectedStudents: string[];
   teacherId: string | null;
+  behaviorType?: 'INDIVIDUAL' | 'GROUP_WORK';
 }
 
 export default function BehaviorSelectionModal({
@@ -26,13 +27,14 @@ export default function BehaviorSelectionModal({
   onClose,
   onConfirm,
   teacherId,
+  behaviorType = 'GROUP_WORK',
 }: BehaviorSelectionModalProps) {
   const {
     behaviors: dbBehaviors,
     createBehavior,
     updateBehavior,
     deleteBehavior,
-  } = useBehaviors(teacherId);
+  } = useBehaviors(teacherId, behaviorType);
 
   const [behaviors, setBehaviors] = useState<Behavior[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
@@ -65,7 +67,6 @@ export default function BehaviorSelectionModal({
         setNewBehaviorName("");
         setShowAddForm(false);
       } catch (error) {
-        console.error("Error adding behavior:", error);
         const errorMessage =
           error instanceof Error
             ? error.message
@@ -82,7 +83,6 @@ export default function BehaviorSelectionModal({
         setEditBehaviorName("");
         setShowEditForm(null);
       } catch (error) {
-        console.error("Error updating behavior:", error);
         const errorMessage =
           error instanceof Error
             ? error.message
@@ -96,8 +96,9 @@ export default function BehaviorSelectionModal({
     if (confirm("Are you sure you want to delete this behavior?")) {
       try {
         await deleteBehavior(id);
+        // Remove the behavior from local state after successful deletion
+        setBehaviors(prev => prev.filter(behavior => behavior.id !== id));
       } catch (error) {
-        console.error("Error deleting behavior:", error);
         const errorMessage =
           error instanceof Error
             ? error.message
