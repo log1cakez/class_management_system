@@ -7,6 +7,21 @@ import BadgeCelebrationModal from "./BadgeCelebrationModal";
 import { useGroupWorks } from "@/hooks/useGroupWorks";
 import { RewardBadge } from "@/assets/images/badges";
 
+interface GroupWork {
+  id: string;
+  name: string;
+  groups: Array<{
+    id: string;
+    name: string;
+    students: Array<{
+      student: {
+        id: string;
+        name: string;
+      };
+    }>;
+  }>;
+}
+
 interface GroupWorkDemoProps {
   teacherId: string | null;
   classId?: string;
@@ -19,11 +34,11 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
   const [showEditModal, setShowEditModal] = useState(false);
   const [showBadgeCelebration, setShowBadgeCelebration] = useState(false);
   const [earnedBadges, setEarnedBadges] = useState<RewardBadge[]>([]);
-  const [selectedGroupWork, setSelectedGroupWork] = useState<any>(null);
+  const [selectedGroupWork, setSelectedGroupWork] = useState<GroupWork | null>(null);
   const [groupPoints, setGroupPoints] = useState<Record<string, Record<string, number>>>({});
 
   // Fetch group points for all group works
-  const fetchGroupPoints = async (groupWorks: any[]) => {
+  const fetchGroupPoints = async (groupWorks: GroupWork[]) => {
     try {
       const pointsData: Record<string, Record<string, number>> = {};
       
@@ -34,7 +49,7 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
           const response = await fetch(`/api/group-work-awards?groupId=${group.id}`);
           if (response.ok) {
             const awards = await response.json();
-            const totalPoints = awards.reduce((sum: number, award: any) => sum + award.points, 0);
+            const totalPoints = awards.reduce((sum: number, award: { points: number }) => sum + award.points, 0);
             pointsData[groupWork.id][group.id] = totalPoints;
           } else {
             pointsData[groupWork.id][group.id] = 0;
@@ -134,12 +149,12 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
     }
   };
 
-  const openAwardModal = (groupWork: any) => {
+  const openAwardModal = (groupWork: GroupWork) => {
     setSelectedGroupWork(groupWork);
     setShowAwardModal(true);
   };
 
-  const openEditModal = (groupWork: any) => {
+  const openEditModal = (groupWork: GroupWork) => {
     setSelectedGroupWork(groupWork);
     setShowEditModal(true);
   };

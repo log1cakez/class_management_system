@@ -41,7 +41,25 @@ interface GroupWorkModalProps {
   }) => void;
   teacherId: string | null;
   classId?: string;
-  initialData?: any;
+  initialData?: {
+    id: string;
+    name: string;
+    groups: Array<{
+      id: string;
+      name: string;
+      students: Array<{
+        student: {
+          id: string;
+          name: string;
+        };
+      }>;
+    }>;
+    behaviors: Array<{
+      behaviorId?: string;
+      id?: string;
+      praise?: string;
+    }>;
+  };
 }
 
 export default function GroupWorkModal({
@@ -105,11 +123,11 @@ export default function GroupWorkModal({
       setActivityName(initialData.name || "");
       
       // Transform groups to match expected structure
-      const transformedGroups = (initialData.groups || []).map((group: any) => ({
+      const transformedGroups = (initialData.groups || []).map((group) => ({
         id: group.id,
         name: group.name,
-        studentIds: group.students?.map((s: any) => s.studentId || s.id) || [],
-        students: group.students?.map((s: any) => ({
+        studentIds: group.students?.map((s) => s.studentId || s.id) || [],
+        students: group.students?.map((s) => ({
           id: s.studentId || s.id,
           name: s.student?.name || s.name || `Student ${s.studentId || s.id}`,
           teacherId: s.teacherId || teacherId || ""
@@ -120,7 +138,7 @@ export default function GroupWorkModal({
       
       // Mark behaviors as selected if they're in the initial data
       if (initialData.behaviors) {
-        const behaviorIds = initialData.behaviors.map((b: any) => b.behaviorId || b.id);
+        const behaviorIds = initialData.behaviors.map((b) => b.behaviorId || b.id);
         setBehaviors(prevBehaviors => 
           prevBehaviors.map(behavior => ({
             ...behavior,
@@ -130,7 +148,7 @@ export default function GroupWorkModal({
         
         // Load existing praise messages from initial data
         const existingPraises: Record<string, string> = {};
-        initialData.behaviors.forEach((behavior: any) => {
+        initialData.behaviors.forEach((behavior) => {
           const behaviorId = behavior.behaviorId || behavior.id;
           if (behavior.praise) {
             existingPraises[behaviorId] = behavior.praise;
@@ -143,7 +161,7 @@ export default function GroupWorkModal({
       resetForm(!isInSession);
       setIsInSession(true);
     }
-  }, [initialData, isOpen, teacherId]);
+  }, [initialData, isOpen, teacherId, isInSession, resetForm]);
 
 
   const toggleBehavior = (id: string) => {
@@ -232,7 +250,7 @@ export default function GroupWorkModal({
         setNewBehaviorName("");
         setNewBehaviorPraise("");
         setShowAddBehavior(false);
-      } catch (error) {
+      } catch {
         alert("Failed to add behavior. Please try again.");
       }
     }
@@ -250,7 +268,7 @@ export default function GroupWorkModal({
           delete newPraises[id];
           return newPraises;
         });
-      } catch (error) {
+      } catch {
         alert("Failed to delete behavior. Please try again.");
       }
     }

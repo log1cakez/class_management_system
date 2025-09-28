@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Build where clause
-    const whereClause: any = { 
+    const whereClause: { teacherId: string; behaviorType?: string } = { 
       teacherId
     }
 
@@ -29,7 +29,7 @@ export async function GET(request: NextRequest) {
     })
 
     return NextResponse.json(behaviors)
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json(newBehavior, { status: 201 })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -119,7 +119,7 @@ export async function PUT(request: NextRequest) {
     })
 
     return NextResponse.json(updatedBehavior)
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
@@ -162,7 +162,7 @@ export async function DELETE(request: NextRequest) {
     })
 
     return NextResponse.json({ message: 'Behavior deleted successfully' })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

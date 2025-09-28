@@ -4,13 +4,13 @@
   "framework": "nextjs",
   "installCommand": "npm install",
   "env": {
-    "DATABASE_URL": "@database_url",
-    "JWT_SECRET": "@jwt_secret"
+    "DATABASE_URL": "postgresql://neondb_owner:npg_Du4gvifWpT2b@ep-frosty-shadow-a1rdkfnf-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+    "JWT_SECRET": "09f91f47820a80fb288827041b681b3b"
   },
   "build": {
     "env": {
-      "DATABASE_URL": "@database_url",
-      "JWT_SECRET": "@jwt_secret"
+      "DATABASE_URL": "postgresql://neondb_owner:npg_Du4gvifWpT2b@ep-frosty-shadow-a1rdkfnf-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require",
+      "JWT_SECRET": "09f91f47820a80fb288827041b681b3b"
     }
   }
 }
