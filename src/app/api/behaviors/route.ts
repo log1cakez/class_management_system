@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
   let name: string | undefined
   let teacherId: string | undefined
   let behaviorType: string | undefined
+  let praise: string | null | undefined
   
   try {
     const body = await request.json()
@@ -47,8 +48,9 @@ export async function POST(request: NextRequest) {
     name = parsed.name
     teacherId = parsed.teacherId
     behaviorType = parsed.behaviorType || 'INDIVIDUAL' // Default to INDIVIDUAL
+    praise = typeof parsed.praise === 'string' && parsed.praise.trim().length > 0 ? parsed.praise.trim() : null
 
-    console.log('Creating behavior with data:', { name, teacherId, behaviorType })
+    console.log('Creating behavior with data:', { name, teacherId, behaviorType, praise })
 
     if (!name || !teacherId) {
       console.log('Missing required fields:', { name: !!name, teacherId: !!teacherId })
@@ -77,7 +79,8 @@ export async function POST(request: NextRequest) {
       data: {
         name,
         teacherId,
-        behaviorType: behaviorType as 'INDIVIDUAL' | 'GROUP_WORK'
+        behaviorType: behaviorType as 'INDIVIDUAL' | 'GROUP_WORK',
+        praise
       }
     })
 
@@ -90,7 +93,8 @@ export async function POST(request: NextRequest) {
       stack: error instanceof Error ? error.stack : undefined,
       name: name,
       teacherId: teacherId,
-      behaviorType: behaviorType
+      behaviorType: behaviorType,
+      praise
     })
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
@@ -100,7 +104,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json()
-    const { id, name, teacherId } = body
+    const { id, name, teacherId, praise } = body
 
     console.log('Updating behavior with data:', { id, name, teacherId })
 
@@ -125,6 +129,7 @@ export async function PUT(request: NextRequest) {
       where: { id },
       data: {
         name: name || existingBehavior.name,
+        praise: typeof praise === 'string' ? (praise.trim().length > 0 ? praise.trim() : null) : existingBehavior.praise,
       }
     })
 

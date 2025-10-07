@@ -9,6 +9,7 @@ import ComplimentModal from "@/components/ComplimentModal";
 import { useStudents } from "@/hooks/useStudents";
 import { useSearchParams } from "next/navigation";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import StudentLeaderboard from "@/components/StudentLeaderboard";
 
 function IndividualTaskContent() {
   const searchParams = useSearchParams();
@@ -21,6 +22,8 @@ function IndividualTaskContent() {
     error,
     addPointsToStudents,
     toggleStudentSelection,
+    toggleSelectAll,
+    sortStudents,
     addingPoints,
   } = useStudents(classId, teacherId);
 
@@ -172,42 +175,90 @@ function IndividualTaskContent() {
           </div>
         )}
 
-        {/* Student Display Cards */}
+        {/* Student Display Cards + Leaderboard */}
         {!loading && !error && classId && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pr-50 pl-50">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2">
+            {/* Control Buttons */}
+            <div className="flex justify-center gap-4 mb-6">
+              {/* Select All Button */}
+              <button
+                onClick={toggleSelectAll}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-6 rounded-lg shadow-lg border-2 border-blue-700 transition-all duration-200 hover:scale-105 flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+                {students.every(s => s.isSelected) ? 'Deselect All' : 'Select All'}
+              </button>
+
+              {/* Sort by Name Button */}
+              <button
+                onClick={() => sortStudents('name')}
+                className="bg-purple-500 hover:bg-purple-600 text-white font-semibold py-2 px-6 rounded-lg shadow-lg border-2 border-purple-700 transition-all duration-200 hover:scale-105 flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+                </svg>
+                Sort by Name
+              </button>
+
+              {/* Sort by Points Button */}
+              <button
+                onClick={() => sortStudents('points')}
+                className="bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-6 rounded-lg shadow-lg border-2 border-green-700 transition-all duration-200 hover:scale-105 flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
+                </svg>
+                Sort by Points
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pr-50 pl-50">
             {students.map((student) => (
               <div key={student.id} className="text-center">
                 {/* Student Card */}
                 <div className="bg-amber-100 bg-opacity-90 rounded-xl p-6 border-2 border-amber-800 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 mb-4">
                   {/* Duck Character */}
                   <div className="mx-auto mb-4 flex items-center justify-center">
-                    <Image
-                      src={
-                        student.points >= 30
+                  <Image
+                    src={
+                      student.points >= 30
+                        ? DUCK_ICONS.DUCK_6
+                        : student.points >= 25
                           ? DUCK_ICONS.DUCK_5
-                          : student.points >= 25
-                          ? DUCK_ICONS.DUCK_4
                           : student.points >= 20
-                          ? DUCK_ICONS.DUCK_3
-                          : student.points >= 10
-                          ? DUCK_ICONS.DUCK_2
-                          : student.points >= 5
-                          ? DUCK_ICONS.DUCK_1
-                          : DUCK_ICONS.DUCK_1
-                      }
-                      alt={`duck level ${Math.floor(student.points / 25) + 1}`}
-                      width={300}
-                      height={300}
-                      className="drop-shadow-lg"
-                      priority
-                    />
-                  </div>
+                            ? DUCK_ICONS.DUCK_4
+                            : student.points >= 10
+                              ? DUCK_ICONS.DUCK_3
+                              : student.points >= 5
+                                ? DUCK_ICONS.DUCK_2
+                                : DUCK_ICONS.DUCK_1
+                    }
+                    alt={`duck level ${Math.floor(student.points / 5) + 1}`}
+                    width={500}
+                    height={500}
+                    className="drop-shadow-lg"
+                    priority
+                  />
+                </div>
 
                   {/* Student Name */}
-                  <div className="text-center">
+                  <div className="text-center mb-2">
                     <h3 className="text-xl font-bold text-yellow-600 drop-shadow-sm">
                       {student.name}
                     </h3>
+                  </div>
+
+                  {/* Points Display */}
+                  <div className="text-center">
+                    <div className="inline-flex items-center gap-2 bg-yellow-500 text-white px-4 py-2 rounded-full shadow-md border-2 border-yellow-600">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                      </svg>
+                      <span className="text-lg font-bold">{student.points} pts</span>
+                    </div>
                   </div>
                 </div>
 
@@ -224,6 +275,15 @@ function IndividualTaskContent() {
                 </div>
               </div>
             ))}
+          </div>
+            </div>
+            {/* Right Leaderboard */}
+            <div className="space-y-6">
+              <StudentLeaderboard
+                students={students.map(s => ({ id: s.id, name: s.name, points: s.points }))}
+                title="Student Stars Leaderboard"
+              />
+            </div>
           </div>
         )}
 

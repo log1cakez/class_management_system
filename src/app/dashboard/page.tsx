@@ -243,7 +243,7 @@ function DashboardContent() {
                                 ? DUCK_ICONS.DUCK_2
                                 : DUCK_ICONS.DUCK_1
                     }
-                    alt={`duck level ${Math.floor(student.points / 25) + 1}`}
+                    alt={`duck level ${Math.floor(student.points / 5) + 1}`}
                     width={500}
                     height={500}
                     className="drop-shadow-lg"

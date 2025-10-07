@@ -109,6 +109,26 @@ export function useStudents(classId: string | null, teacherId: string | null) {
     )
   }
 
+  const toggleSelectAll = () => {
+    const allSelected = students.every(student => student.isSelected)
+    setStudents(prevStudents =>
+      prevStudents.map(student => ({ ...student, isSelected: !allSelected }))
+    )
+  }
+
+  const sortStudents = (sortBy: 'name' | 'points') => {
+    setStudents(prevStudents => {
+      const sorted = [...prevStudents].sort((a, b) => {
+        if (sortBy === 'name') {
+          return a.name.localeCompare(b.name)
+        } else {
+          return b.points - a.points // Descending order for points
+        }
+      })
+      return sorted
+    })
+  }
+
   const createStudent = async (name: string) => {
     if (!classId || !teacherId) throw new Error('Class ID and Teacher ID are required')
 
@@ -155,6 +175,8 @@ export function useStudents(classId: string | null, teacherId: string | null) {
     creatingStudent,
     addPointsToStudents,
     toggleStudentSelection,
+    toggleSelectAll,
+    sortStudents,
     createStudent,
     refetch: fetchStudents,
   }

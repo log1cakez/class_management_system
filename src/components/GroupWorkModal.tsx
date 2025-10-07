@@ -53,17 +53,14 @@ export default function GroupWorkModal({
   initialData,
 }: GroupWorkModalProps) {
   const { students: dbStudents } = useStudents(classId, teacherId);
-  const { behaviors: dbBehaviors, createBehavior, deleteBehavior } = useBehaviors(teacherId, 'GROUP_WORK');
+  const { behaviors: dbBehaviors, refetch: refetchBehaviors } = useBehaviors(teacherId, 'GROUP_WORK');
 
   const [behaviors, setBehaviors] = useState<Behavior[]>([]);
   const [students, setStudents] = useState<Student[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
   const [activityName, setActivityName] = useState("");
   const [showAddGroup, setShowAddGroup] = useState(false);
-  const [showAddBehavior, setShowAddBehavior] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
-  const [newBehaviorName, setNewBehaviorName] = useState("");
-  const [newBehaviorPraise, setNewBehaviorPraise] = useState("");
   const [behaviorPraises, setBehaviorPraises] = useState<Record<string, string>>({});
   const [isInSession, setIsInSession] = useState(false);
 
@@ -90,14 +87,18 @@ export default function GroupWorkModal({
     setBehaviors(behaviors.map(behavior => ({ ...behavior, isSelected: false })));
     setStudents(students.map(student => ({ ...student, isSelected: false })));
     setShowAddGroup(false);
-    setShowAddBehavior(false);
     setNewGroupName("");
-    setNewBehaviorName("");
-    setNewBehaviorPraise("");
     if (clearPraises) {
       setBehaviorPraises({});
     }
   };
+
+  // Ensure behaviors/options are present when opening (create or edit)
+  useEffect(() => {
+    if (!isOpen || !teacherId) return;
+    // Refetch via hook to guarantee we have options
+    refetchBehaviors && refetchBehaviors();
+  }, [isOpen, teacherId, refetchBehaviors]);
 
   // Populate form when editing
   useEffect(() => {
@@ -121,15 +122,31 @@ export default function GroupWorkModal({
       
       setGroups(transformedGroups);
       
-      // Mark behaviors as selected if they're in the initial data
+      // Merge options from dbBehaviors with selected from initial data
       if (initialData.behaviors) {
-        const behaviorIds = initialData.behaviors.map((b: any) => b.behaviorId || b.id);
-        setBehaviors(prevBehaviors => 
-          prevBehaviors.map(behavior => ({
-            ...behavior,
-            isSelected: behaviorIds.includes(behavior.id)
-          }))
-        );
+        const selectedIds = initialData.behaviors.map((b: any) => b.behaviorId || b.id);
+
+        // If no dbBehaviors yet, create list from initialData to avoid empty UI
+        if (!dbBehaviors || dbBehaviors.length === 0) {
+          const fromInitial = initialData.behaviors.map((b: any) => ({
+            id: b.behaviorId || b.id,
+            name: b.behavior?.name || b.name || 'Behavior',
+            teacherId: teacherId || '',
+            isSelected: true,
+            praise: b.praise || undefined,
+          }));
+          setBehaviors(fromInitial);
+        } else {
+          setBehaviors(
+            dbBehaviors.map((b: any) => ({
+              id: b.id,
+              name: b.name,
+              teacherId: b.teacherId,
+              isSelected: selectedIds.includes(b.id),
+              praise: initialData.behaviors.find((ib: any) => (ib.behaviorId || ib.id) === b.id)?.praise || b.praise,
+            }))
+          );
+        }
         
         // Load existing praise messages from initial data
         const existingPraises: Record<string, string> = {};
@@ -148,7 +165,7 @@ export default function GroupWorkModal({
       resetForm(!isInSession);
       setIsInSession(true);
     }
-  }, [initialData, isOpen, teacherId]);
+  }, [initialData, isOpen, teacherId, dbBehaviors]);
 
 
   const toggleBehavior = (id: string) => {
@@ -163,14 +180,12 @@ export default function GroupWorkModal({
       )
     );
     
-    // If deselecting a behavior, remove its praise message
-    if (isCurrentlySelected && behaviorPraises[id]) {
-      setBehaviorPraises(prev => {
-        const newPraises = { ...prev };
-        delete newPraises[id];
-        return newPraises;
-      });
+    // On select: prefill from existing praise (from DB or prior state) if available
+    if (!isCurrentlySelected && behavior && behavior.praise && !behaviorPraises[id]) {
+      setBehaviorPraises(prev => ({ ...prev, [id]: behavior.praise as string }));
     }
+
+    // On deselect: preserve praise (do not delete) so it restores when re-selected
   };
 
   const toggleStudent = (id: string) => {
@@ -190,6 +205,32 @@ export default function GroupWorkModal({
           : student
       )
     );
+  };
+
+  const toggleSelectAllStudents = () => {
+    // Get students that are not already in groups
+    const availableStudents = students.filter(student => 
+      !groups.some(group => group.students.some(s => s.id === student.id))
+    );
+    
+    const allAvailableSelected = availableStudents.every(s => s.isSelected);
+    
+    setStudents(prevStudents =>
+      prevStudents.map(student => {
+        const isInGroup = groups.some(group => group.students.some(s => s.id === student.id));
+        if (isInGroup) return student;
+        return { ...student, isSelected: !allAvailableSelected };
+      })
+    );
+  };
+
+  const sortStudentsBy = (sortBy: 'name') => {
+    setStudents(prevStudents => {
+      const sorted = [...prevStudents].sort((a, b) => {
+        return a.name.localeCompare(b.name);
+      });
+      return sorted;
+    });
   };
 
   const addGroup = () => {
@@ -214,47 +255,7 @@ export default function GroupWorkModal({
     setGroups(groups.filter((_, i) => i !== index));
   };
 
-  const addBehavior = async () => {
-    if (!newBehaviorName.trim()) {
-      alert("Please enter a behavior name");
-      return;
-    }
-    
-    if (!newBehaviorPraise.trim()) {
-      alert("Please enter a praise message for this behavior");
-      return;
-    }
-    
-    if (teacherId) {
-      try {
-        // Create behavior in database
-        const newBehavior = await createBehavior(newBehaviorName.trim());
-        
-        // Add the new behavior to local state with praise
-        const behaviorWithPraise = {
-          ...newBehavior,
-          isSelected: true,
-          praise: newBehaviorPraise.trim()
-        };
-        
-        setBehaviors(prev => [...prev, behaviorWithPraise]);
-        
-        // Add praise to behaviorPraises state
-        setBehaviorPraises(prev => ({
-          ...prev,
-          [newBehavior.id]: newBehaviorPraise.trim()
-        }));
-        
-        // Reset form
-        setNewBehaviorName("");
-        setNewBehaviorPraise("");
-        setShowAddBehavior(false);
-      } catch (error) {
-        console.error("Error adding behavior:", error);
-        alert("Failed to add behavior. Please try again.");
-      }
-    }
-  };
+  // Add/Delete behavior controls removed; behaviors are managed globally via BehaviorManagementModal
 
   const removeBehavior = async (id: string) => {
     if (confirm("Are you sure you want to delete this behavior?")) {
@@ -381,67 +382,7 @@ export default function GroupWorkModal({
                 <h3 className="text-lg font-bold text-gray-700">
                   Select Target Behaviors ({selectedBehaviorCount} selected)
                 </h3>
-                <button
-                  onClick={() => setShowAddBehavior(!showAddBehavior)}
-                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105"
-                >
-                  {showAddBehavior ? "Cancel" : "Add Behavior"}
-                </button>
               </div>
-
-              {showAddBehavior && (
-                <div className="mb-4 p-4 bg-gray-100 rounded-lg space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Behavior Name
-                    </label>
-                    <input
-                      type="text"
-                      value={newBehaviorName}
-                      onChange={(e) => setNewBehaviorName(e.target.value)}
-                      placeholder="Enter behavior name... (Ctrl+Enter to add)"
-                      className="w-full px-4 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      onKeyPress={(e) => {
-                        if (e.key === "Enter" && e.ctrlKey) {
-                          addBehavior();
-                        }
-                      }}
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Praise Message
-                    </label>
-                    <textarea
-                      value={newBehaviorPraise}
-                      onChange={(e) => setNewBehaviorPraise(e.target.value)}
-                      placeholder="Enter praise message for this behavior..."
-                      rows={3}
-                      className="w-full px-4 py-2 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 resize-none"
-                    />
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <button
-                      onClick={addBehavior}
-                      className="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105"
-                    >
-                      Add Behavior
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowAddBehavior(false);
-                        setNewBehaviorName("");
-                        setNewBehaviorPraise("");
-                      }}
-                      className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
 
               <div className="space-y-3 max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3 bg-white">
                 {behaviors.map((behavior) => (
@@ -463,60 +404,17 @@ export default function GroupWorkModal({
                           </span>
                         )}
                       </label>
-                      <button
-                        onClick={() => removeBehavior(behavior.id)}
-                        className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-sm font-semibold transition-all duration-200 hover:scale-105"
-                        title="Remove behavior"
-                      >
-                        ×
-                      </button>
+                      {/* Remove per-activity delete; behaviors are managed in BehaviorManagementModal */}
                     </div>
                     
                     {behavior.isSelected && (
                       <div className="mt-2">
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Praise message for {behavior.name}:
+                          Praise message for {behavior.name} (read-only):
                         </label>
-                        {behaviorPraises[behavior.id] ? (
-                          <div className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
-                            {behaviorPraises[behavior.id]}
-                          </div>
-                        ) : (
-                          <div className="flex gap-2">
-                            <input
-                              type="text"
-                              placeholder="Enter praise message for this behavior... (Required)"
-                              className="flex-1 px-3 py-2 text-black border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 text-sm"
-                              onKeyPress={(e) => {
-                                if (e.key === 'Enter') {
-                                  const input = e.target as HTMLInputElement;
-                                  if (input.value.trim()) {
-                                    setBehaviorPraises(prev => ({
-                                      ...prev,
-                                      [behavior.id]: input.value.trim()
-                                    }));
-                                    input.value = '';
-                                  }
-                                }
-                              }}
-                            />
-                            <button
-                              onClick={(e) => {
-                                const input = e.currentTarget.previousElementSibling as HTMLInputElement;
-                                if (input.value.trim()) {
-                                  setBehaviorPraises(prev => ({
-                                    ...prev,
-                                    [behavior.id]: input.value.trim()
-                                  }));
-                                  input.value = '';
-                                }
-                              }}
-                              className="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-2 rounded-lg text-sm font-semibold transition-all duration-200 hover:scale-105"
-                            >
-                              Add
-                            </button>
-                          </div>
-                        )}
+                        <div className="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700">
+                          {(behaviorPraises[behavior.id] || behavior.praise || '').trim() || 'No praise defined'}
+                        </div>
                       </div>
                     )}
                   </div>
@@ -566,6 +464,29 @@ export default function GroupWorkModal({
                         </div>
                       );
                     })()}
+                    
+                    {/* Control Buttons */}
+                    <div className="flex gap-2 mb-3">
+                      <button
+                        onClick={toggleSelectAllStudents}
+                        className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-semibold py-1 px-3 rounded transition-all duration-200 flex items-center gap-1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                        </svg>
+                        {students.filter(s => !groups.some(g => g.students.some(gs => gs.id === s.id))).every(s => s.isSelected) ? 'Deselect All' : 'Select All'}
+                      </button>
+                      <button
+                        onClick={() => sortStudentsBy('name')}
+                        className="bg-purple-500 hover:bg-purple-600 text-white text-xs font-semibold py-1 px-3 rounded transition-all duration-200 flex items-center gap-1"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h9m5-4v12m0 0l-4-4m4 4l4-4" />
+                        </svg>
+                        Sort A-Z
+                      </button>
+                    </div>
+
                     {students.length === 0 ? (
                       <div className="p-4 bg-yellow-100 border border-yellow-300 rounded-lg">
                         <p className="text-yellow-800 text-sm">

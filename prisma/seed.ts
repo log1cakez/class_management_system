@@ -38,14 +38,14 @@ const individualBehaviors = [
 ]
 
 const groupWorkBehaviors = [
-  'Collaboration',
-  'Leadership',
-  'Communication',
-  'Problem solving',
-  'Active participation',
-  'Respectful listening',
-  'Sharing ideas',
-  'Supporting teammates'
+  { name: 'Collaboration', praise: 'Amazing teamwork! Everyone contributed and worked together beautifully.' },
+  { name: 'Leadership', praise: 'Strong leadership shown—guiding the team with kindness and clarity!' },
+  { name: 'Communication', praise: 'Clear and respectful communication—great listening and sharing of ideas!' },
+  { name: 'Problem solving', praise: 'Clever thinking to solve the challenge as a team—well done!' },
+  { name: 'Active participation', praise: 'Everyone got involved—fantastic group energy and effort!' },
+  { name: 'Respectful listening', praise: 'Wonderful listening—everyone gave each other a chance to speak.' },
+  { name: 'Sharing ideas', praise: 'So many creative ideas shared—brilliant collaboration!' },
+  { name: 'Supporting teammates', praise: 'You lifted each other up—kindness and support all the way!' }
 ]
 
 async function main() {
@@ -93,7 +93,7 @@ async function main() {
 
   // Seed group work behaviors
   console.log('👥 Creating group work behaviors...')
-  for (const behaviorName of groupWorkBehaviors) {
+  for (const { name: behaviorName, praise: defaultPraise } of groupWorkBehaviors) {
     const behavior = await prisma.behavior.upsert({
       where: {
         name_teacherId: {
@@ -103,17 +103,51 @@ async function main() {
       },
       update: {
         name: behaviorName,
+        praise: defaultPraise,
         isDefault: true,
         behaviorType: BehaviorType.GROUP_WORK
       },
       create: {
         name: behaviorName,
+        praise: defaultPraise,
         teacherId: defaultTeacher.id,
         isDefault: true,
         behaviorType: BehaviorType.GROUP_WORK
       }
     })
     console.log(`✅ Group work behavior created: ${behaviorName}`)
+  }
+
+  // Ensure ALL existing teachers have copies of default GROUP_WORK behaviors
+  console.log('👩‍🏫 Propagating default group work behaviors to all teachers...')
+  const allTeachers = await prisma.teacher.findMany()
+  const defaultGroupBehaviors = await prisma.behavior.findMany({
+    where: { teacherId: defaultTeacher.id, isDefault: true, behaviorType: BehaviorType.GROUP_WORK }
+  })
+
+  for (const teacher of allTeachers) {
+    if (teacher.id === defaultTeacher.id) continue
+    for (const def of defaultGroupBehaviors) {
+      await prisma.behavior.upsert({
+        where: {
+          name_teacherId: { name: def.name, teacherId: teacher.id }
+        },
+        update: {
+          // keep teacher-specific copy up to date with name/praise
+          name: def.name,
+          praise: def.praise ?? null,
+          behaviorType: BehaviorType.GROUP_WORK,
+          isDefault: false
+        },
+        create: {
+          name: def.name,
+          praise: def.praise ?? null,
+          teacherId: teacher.id,
+          isDefault: false,
+          behaviorType: BehaviorType.GROUP_WORK
+        }
+      })
+    }
   }
 
   console.log('🎉 Database seeded successfully!')

@@ -11,9 +11,10 @@ import LoadingSpinner from "./LoadingSpinner";
 interface GroupWorkDemoProps {
   teacherId: string | null;
   classId?: string;
+  onLeaderboardChange?: (groups: { id: string; name: string; points: number }[]) => void;
 }
 
-export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps) {
+export default function GroupWorkDemo({ teacherId, classId, onLeaderboardChange }: GroupWorkDemoProps) {
   const { 
     groupWorks, 
     createGroupWork, 
@@ -31,6 +32,8 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
   const [earnedBadges, setEarnedBadges] = useState<RewardBadge[]>([]);
   const [selectedGroupWork, setSelectedGroupWork] = useState<any>(null);
   const [groupPoints, setGroupPoints] = useState<Record<string, Record<string, number>>>({});
+  const [leaderboard, setLeaderboard] = useState<{ id: string; name: string; points: number }[]>([]);
+  const [leaderboardOpen, setLeaderboardOpen] = useState<Record<string, boolean>>({});
   const [loadingGroupPoints, setLoadingGroupPoints] = useState(false);
   const [awardingPoints, setAwardingPoints] = useState(false);
 
@@ -56,6 +59,17 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
       }
       
       setGroupPoints(pointsData);
+      // Flatten to leaderboard entries
+      const entries: { id: string; name: string; points: number }[] = [];
+      for (const gw of groupWorks) {
+        for (const group of gw.groups) {
+          const pts = pointsData[gw.id]?.[group.id] || 0;
+          entries.push({ id: group.id, name: group.name, points: pts });
+        }
+      }
+      entries.sort((a,b)=>b.points-a.points);
+      setLeaderboard(entries);
+      if (onLeaderboardChange) onLeaderboardChange(entries);
     } catch (error) {
       console.error("Error fetching group points:", error);
     } finally {
@@ -248,7 +262,7 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
           {groupWorks.map((groupWork) => (
             <div
               key={groupWork.id}
-              className="bg-white rounded-xl shadow-lg border-2 border-yellow-300 p-6 hover:shadow-xl transition-all duration-200"
+              className="bg-white rounded-xl shadow-lg border-2 border-yellow-300 p-6 pb-7 hover:shadow-xl transition-all duration-200"
             >
               <h3 className="text-xl font-bold text-gray-800 mb-2">{groupWork.name}</h3>
               
@@ -264,12 +278,44 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
                     return (
                       <div key={group.id} className="text-sm text-gray-600 flex justify-between items-center">
                         <span>• {group.name} ({group.students.length} students)</span>
-                        <span className="text-green-600 font-semibold">{points} pts</span>
+                        <span className="text-green-600 font-semibold">{points} {points === 1 ? 'pt' : 'pts'}</span>
                       </div>
                     );
                   })}
                 </div>
               </div>
+
+              {/* Activity Leaderboard (toggle) */}
+              <div className="mb-2">
+                <button
+                  onClick={() => setLeaderboardOpen(prev => ({ ...prev, [groupWork.id]: !prev[groupWork.id] }))}
+                  className="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm"
+                >
+                  {leaderboardOpen[groupWork.id] ? 'Hide Leaderboard' : 'Show Leaderboard'}
+                </button>
+              </div>
+              {leaderboardOpen[groupWork.id] && (
+                <div className="mb-4">
+                  {(() => {
+                    const entries = [...groupWork.groups]
+                      .map((g: any) => ({ id: g.id, name: g.name, points: groupPoints[groupWork.id]?.[g.id] || 0 }))
+                      .sort((a, b) => b.points - a.points);
+                    return (
+                      <ul className="space-y-2 rounded-2xl p-3 bg-gradient-to-br from-emerald-50 via-cyan-50 to-indigo-50 border border-emerald-200">
+                        {entries.map((e, idx) => (
+                          <li key={e.id} className={`flex items-center justify-between px-3 py-2 rounded-xl bg-white border ${idx < 3 ? 'border-emerald-300' : 'border-gray-200'}`}>
+                            <div className="flex items-center gap-2">
+                              <span className="w-6 text-center">{idx === 0 ? '👑' : idx === 1 ? '🎖️' : idx === 2 ? '🏅' : idx + 1}</span>
+                              <span className="font-medium text-gray-800">{e.name}</span>
+                            </div>
+                            <span className="text-indigo-700 font-bold">{e.points} {e.points === 1 ? 'pt' : 'pts'}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    );
+                  })()}
+                </div>
+              )}
 
               <div className="mb-4">
                 <p className="text-sm font-semibold text-gray-700 mb-1">Behaviors ({groupWork.behaviors.length}):</p>
@@ -282,7 +328,7 @@ export default function GroupWorkDemo({ teacherId, classId }: GroupWorkDemoProps
                 </div>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 mt-4 flex-wrap">
                 <button
                   onClick={() => openAwardModal(groupWork)}
                   disabled={awardingPoints || loadingGroupPoints}
