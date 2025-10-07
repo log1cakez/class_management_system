@@ -37,7 +37,7 @@ export const DUCK_ICONS = {
   DUCK_3: '/icons/World_Wildlife_Day_16.png',
   DUCK_4: '/icons/World_Wildlife_Day_14.png',
   DUCK_5: '/icons/World_Wildlife_Day_13.png',
-  DUCK_6: '/icons/World_Wildlife_Day_11.png',
+  DUCK_6: '/icons/World_Wildlife_Day_12.png',
 } as const
 
 export const REWARD_ICONS = {
