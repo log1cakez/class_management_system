@@ -21,9 +21,9 @@ function GroupWorkDashboardContent() {
   const [groupsForLeaderboard, setGroupsForLeaderboard] = useState<{id:string;name:string;points:number}[]>([]);
 
   return (
-    <main className="relative w-full h-screen overflow-hidden">
+    <main className="min-h-screen relative overflow-hidden">
       {/* Background Image */}
-      <div className="absolute inset-0 w-full h-full">
+      <div className="absolute inset-0 z-0">
         <Image
           src={IMAGES.HOMEPAGE_BG}
           alt="Group Work Dashboard Background"
@@ -32,15 +32,25 @@ function GroupWorkDashboardContent() {
           priority
           sizes="100vw"
           quality={85}
+          placeholder="blur"
+          blurDataURL="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAhEAACAQMDBQAAAAAAAAAAAAABAgMABAUGIWGRkqGx0f/EABUBAQEAAAAAAAAAAAAAAAAAAAMF/8QAGhEAAgIDAAAAAAAAAAAAAAAAAAECEgMRkf/aAAwDAQACEQMRAD8AltJagyeH0AthI5xdrLcNM91BF5pX2HaH9bcfaSWGaRmknyJckliyjqTzSlT54b6bk+h0R//2Q=="
         />
       </div>
 
+      {/* Content Overlay */}
+      <div className="relative z-10 min-h-screen p-8">
+        {/* Header Section */}
+        <div className="flex justify-between items-center mb-8">
+          {/* Group Work Title */}
+          <div className="flex-1">
+            <div className="bg-amber-100 rounded-2xl px-8 py-4 border-2 border-amber-800 shadow-lg mx-auto max-w-md">
+              <h1 className="text-3xl font-bold text-orange-500 text-center drop-shadow-sm">
+                GROUP WORK ACTIVITIES
+              </h1>
+            </div>
+          </div>
 
-
-      {/* Main Content */}
-      <div className="relative z-10 w-full h-full flex flex-col items-center justify-center p-8">
-        {/* Top-right Navigation Buttons */}
-        <div className="absolute top-6 right-6">
+          {/* Navigation Buttons - Top Right */}
           <NavigationButtons
             homeButtonSize={80}
             backButtonSize={80}
@@ -59,25 +69,29 @@ function GroupWorkDashboardContent() {
             }
           />
         </div>
-        <div className="bg-white bg-opacity-95 rounded-3xl p-8 max-w-6xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border-4 border-blue-400">
-          {/* Title */}
-          <div className="text-center mb-8">
-            <div className="bg-blue-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg border-2 border-blue-600 text-xl inline-block">
-              Group Work Activities
-            </div>
-            <div className="mt-4 flex justify-center">
-              <button
-                onClick={() => setShowManageBehaviors(true)}
-                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded shadow"
-              >
-                Manage Behaviors
-              </button>
-            </div>
-            {className && (
-              <div className="mt-4 text-lg text-gray-700 font-semibold">
+
+        {/* Main Content */}
+        <div className="bg-white bg-opacity-95 rounded-3xl p-8 max-w-6xl w-full mx-auto shadow-2xl border-4 border-amber-400">
+          {/* Class Name Display */}
+          {className && (
+            <div className="text-center mb-6">
+              <div className="text-lg text-gray-700 font-semibold">
                 Class: {className}
               </div>
-            )}
+            </div>
+          )}
+
+          {/* Manage Behaviors Button */}
+          <div className="flex justify-center mb-6">
+            <button
+              onClick={() => setShowManageBehaviors(true)}
+              className="bg-amber-800 hover:bg-amber-900 text-white font-semibold py-2 px-6 rounded-lg shadow-lg border-2 border-amber-900 transition-all duration-200 hover:scale-105 flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+              </svg>
+              Manage Behaviors
+            </button>
           </div>
 
           {/* Group Work Demo (leaderboards rendered per activity) */}
@@ -95,7 +109,16 @@ function GroupWorkDashboardContent() {
 
 export default function GroupWorkDashboardPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-lg text-gray-600">Loading group work page...</p>
+          </div>
+        </div>
+      }
+    >
       <GroupWorkDashboardContent />
     </Suspense>
   );

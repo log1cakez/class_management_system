@@ -100,7 +100,7 @@ export default function BehaviorManagementModal({ isOpen, onClose, teacherId }: 
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-transparent backdrop-blur-md">
       <div className="bg-white/95 rounded-2xl shadow-2xl border-4 border-blue-400 w-full max-w-3xl max-h-[85vh] overflow-y-auto p-6 text-black">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-black">Manage Group Behaviors</h2>
+          <h2 className="text-xl font-bold text-black">MANAGE GROUP BEHAVIORS</h2>
           <button onClick={onClose} className="px-3 py-1 bg-gray-200 text-black rounded hover:bg-gray-300">Close</button>
         </div>
 

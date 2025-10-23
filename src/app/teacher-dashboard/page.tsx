@@ -2,7 +2,7 @@
 
 import { useState, Suspense } from "react";
 import Image from "next/image";
-import { IMAGES } from "@/assets/images/config";
+import { ICONS, IMAGES } from "@/assets/images/config";
 import { useClasses } from "@/hooks/useClasses";
 import { useSearchParams } from "next/navigation";
 
@@ -67,7 +67,7 @@ function TeacherDashboardContent() {
         <div className="flex-1">
           <div className="bg-amber-100 rounded-2xl px-8 py-4 border-2 border-amber-800 shadow-lg mx-auto max-w-md">
             <h1 className="text-3xl font-bold text-orange-500 text-center drop-shadow-sm">
-              Class Dashboard
+              CLASS DASHBOARD
             </h1>
           </div>
         </div>
@@ -161,17 +161,10 @@ function TeacherDashboardContent() {
 
                 {/* Class Icon */}
                 <div className="mx-auto mb-4 flex items-center justify-center">
-                  <div className="w-24 h-24 bg-yellow-400 rounded-full flex items-center justify-center border-4 border-yellow-500 shadow-lg">
-                    <svg
-                      className="w-12 h-12 text-yellow-800"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
+               <Image src={"/icons/blackboard.svg"} alt="Class Icon" width={100} height={100} />
                 </div>
 
+               
                 {/* Class Name */}
                 <div className="text-center">
                   <h3 className="text-xl font-bold text-yellow-600 drop-shadow-sm">
@@ -181,7 +174,7 @@ function TeacherDashboardContent() {
                     Click to manage students
                   </p>
                 </div>
-              </div>
+                </div>
             ))}
           </div>
         )}

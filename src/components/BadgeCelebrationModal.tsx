@@ -59,7 +59,7 @@ export default function BadgeCelebrationModal({
   return (
     <div className="fixed inset-0 flex items-center justify-center z-50">
       {/* Blurred background overlay */}
-      <div className="absolute inset-0 bg-black bg-opacity-30 backdrop-blur-md"></div>
+      <div className="absolute inset-0 backdrop-blur-md"></div>
       
       {/* Magical sparkles background */}
       {showSparkles && (
@@ -106,12 +106,9 @@ export default function BadgeCelebrationModal({
       )}
       
       {/* Modal content with magical entrance */}
-      <div className={`relative bg-gradient-to-br from-yellow-50 via-white to-blue-50 rounded-3xl p-8 max-w-2xl mx-4 text-center shadow-2xl border-4 border-yellow-300 transform transition-all duration-700 z-10 ${
+      <div className={`relative bg-transparent p-8 max-w-2xl mx-4 text-center transform transition-all duration-700 z-10 ${
         showBadge ? 'scale-100 opacity-100 rotate-0' : 'scale-50 opacity-0 rotate-12'
       }`}>
-        
-        {/* Magical glow effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-yellow-200 via-transparent to-blue-200 rounded-3xl opacity-20 animate-pulse -z-10"></div>
         
         {/* Badge with magical animation */}
         <div className="mb-6 relative">
@@ -147,7 +144,7 @@ export default function BadgeCelebrationModal({
         <h2 className={`text-3xl font-bold bg-gradient-to-r from-yellow-600 via-red-500 to-pink-500 bg-clip-text text-transparent mb-3 transform transition-all duration-1000 relative z-10 ${
           showBadge ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
-          🎉 Congratulations {currentBadge.groupName ? `"${currentBadge.groupName}"` : ''}! 🎉
+          🎉 CONGRATULATIONS {currentBadge.groupName ? `"${currentBadge.groupName}"` : ''}! 🎉
         </h2>
         
         <p className={`text-lg text-gray-700 mb-3 font-semibold transform transition-all duration-1000 delay-200 relative z-10 ${
@@ -156,7 +153,7 @@ export default function BadgeCelebrationModal({
           ✨ You've earned a badge! ✨
         </p>
         
-        <p className={`text-xl text-gray-800 mb-6 font-bold transform transition-all duration-1000 delay-400 relative z-10 bg-gradient-to-r from-yellow-100 to-blue-100 px-6 py-4 rounded-xl border-2 border-yellow-300 shadow-lg ${
+        <p className={`text-xl text-gray-800 mb-6 font-bold transform transition-all duration-1000 delay-400 relative z-10 ${
           showBadge ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
           ✨ "{currentBadge.praise || currentBadge.description}" ✨
@@ -167,12 +164,12 @@ export default function BadgeCelebrationModal({
           <div className={`text-sm text-gray-500 mb-4 transform transition-all duration-1000 delay-600 relative z-10 ${
             showBadge ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
           }`}>
-            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-100 to-purple-100 px-3 py-1 rounded-full">
+            <div className="inline-flex items-center gap-2 px-3 py-1">
               <span className="text-blue-600 font-semibold">{currentBadgeIndex + 1}</span>
               <span className="text-gray-600">of</span>
               <span className="text-purple-600 font-semibold">{badges.length}</span>
               <span className="text-gray-600">badges</span>
-            </div>
+            </div>  
           </div>
         )}
         
@@ -189,11 +186,11 @@ export default function BadgeCelebrationModal({
         </div>
         
         {/* Magical border animation */}
-        <div className="absolute inset-0 rounded-3xl border-2 border-transparent bg-gradient-to-r from-yellow-400 via-red-400 to-blue-400 animate-pulse -z-10" style={{
+        {/* <div className="absolute inset-0 rounded-3xl border-2 border-transparent bg-gradient-to-r from-yellow-400 via-red-400 to-blue-400 animate-pulse -z-10" style={{
           background: 'linear-gradient(45deg, #fbbf24, #ef4444, #3b82f6, #8b5cf6, #fbbf24)',
           backgroundSize: '400% 400%',
           animation: 'gradient 3s ease infinite'
-        }}></div>
+        }}></div> */}
       </div>
       
       <style jsx>{`

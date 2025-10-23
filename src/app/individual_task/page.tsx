@@ -125,7 +125,7 @@ function IndividualTaskContent() {
           <div className="flex-1">
             <div className="bg-amber-100 rounded-2xl px-8 py-4 border-2 border-amber-800 shadow-lg mx-auto max-w-md">
               <h1 className="text-3xl font-bold text-orange-500 text-center drop-shadow-sm">
-                Individual task
+                INDIVIDUAL TASK
               </h1>
             </div>
           </div>

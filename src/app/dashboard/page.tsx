@@ -105,7 +105,7 @@ function DashboardContent() {
           <div className="flex-1">
             <div className="bg-amber-100 rounded-2xl px-8 py-4 border-2 border-amber-800 shadow-lg mx-auto max-w-md">
               <h1 className="text-3xl font-bold text-orange-500 text-center drop-shadow-sm">
-                {className ? `${className} Dashboard` : "Class Dashboard"}
+                {className ? `${className.toUpperCase()} DASHBOARD` : "CLASS DASHBOARD"}
               </h1>
             </div>
           </div>
@@ -283,7 +283,7 @@ function DashboardContent() {
             {/* Modal Header */}
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-800 mb-2">
-                Choose Task Type
+                CHOOSE TASK TYPE
               </h2>
               <p className="text-gray-600">
                 Select how you want to assign points
@@ -348,7 +348,7 @@ function DashboardContent() {
             {/* Modal Header */}
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-800 mb-2 drop-shadow-sm">
-                Unlock Awesome Accessories for your Avatar!
+                UNLOCK AWESOME ACCESSORIES FOR YOUR AVATAR!
               </h2>
             </div>
 
