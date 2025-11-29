@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import GroupWorkModal from "./GroupWorkModal";
 import GroupAwardModal from "./GroupAwardModal";
 import BadgeCelebrationModal from "./BadgeCelebrationModal";
@@ -38,6 +38,9 @@ export default function GroupWorkDemo({ teacherId, classId, onLeaderboardChange 
   const [selectedLeaderboardGroupWork, setSelectedLeaderboardGroupWork] = useState<any>(null);
   const [loadingGroupPoints, setLoadingGroupPoints] = useState(false);
   const [awardingPoints, setAwardingPoints] = useState(false);
+  const [showOlderActivities, setShowOlderActivities] = useState(false);
+  const [selectedActivityId, setSelectedActivityId] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Fetch group points for all group works
   const fetchGroupPoints = async (groupWorks: any[]) => {
@@ -85,6 +88,23 @@ export default function GroupWorkDemo({ teacherId, classId, onLeaderboardChange 
       fetchGroupPoints(groupWorks);
     }
   }, [groupWorks]);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowOlderActivities(false);
+      }
+    };
+
+    if (showOlderActivities) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showOlderActivities]);
 
   const handleCreateGroupWork = async (data: {
     name: string;
@@ -222,24 +242,105 @@ export default function GroupWorkDemo({ teacherId, classId, onLeaderboardChange 
     return <div>Please log in to access group work features.</div>;
   }
 
+  // Sort group works by createdAt (most recent first)
+  const sortedGroupWorks = [...groupWorks].sort((a, b) => {
+    const dateA = new Date(a.createdAt).getTime();
+    const dateB = new Date(b.createdAt).getTime();
+    return dateB - dateA; // Most recent first
+  });
+
+  // Get the latest activity (first in sorted array)
+  const latestActivity = sortedGroupWorks[0];
+  
+  // Get older activities (all except the latest)
+  const olderActivities = sortedGroupWorks.slice(1);
+  
+  // Determine which activity to display
+  const displayedActivity = selectedActivityId 
+    ? sortedGroupWorks.find(gw => gw.id === selectedActivityId) || latestActivity
+    : latestActivity;
+
   return (
     <div className="p-6">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">GROUP WORK ACTIVITIES</h2>
-        <button
-          onClick={() => setShowCreateModal(true)}
-          disabled={creatingGroupWork}
-          className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105 flex items-center gap-2"
-        >
-          {creatingGroupWork ? (
-            <>
-              <LoadingSpinner size="sm" />
-              Creating...
-            </>
-          ) : (
-            "Create New Group Work"
+        <div className="flex items-center gap-4 flex-wrap">
+          <button
+            onClick={() => setShowCreateModal(true)}
+            disabled={creatingGroupWork}
+            className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105 flex items-center gap-2"
+          >
+            {creatingGroupWork ? (
+              <>
+                <LoadingSpinner size="sm" />
+                Creating...
+              </>
+            ) : (
+              "Create New Group Work"
+            )}
+          </button>
+          
+          {/* Dropdown for older activities */}
+          {!loading && groupWorks.length > 0 && olderActivities.length > 0 && (
+            <div className="relative ml-auto" ref={dropdownRef}>
+              <button
+                onClick={() => setShowOlderActivities(!showOlderActivities)}
+                className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200 hover:scale-105 flex items-center gap-2"
+              >
+                <svg 
+                  className={`w-5 h-5 transition-transform duration-200 ${showOlderActivities ? 'rotate-180' : ''}`} 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+                {selectedActivityId 
+                  ? `Viewing: ${displayedActivity?.name || 'Activity'}`
+                  : `View Older Activities (${olderActivities.length})`}
+              </button>
+              
+              {showOlderActivities && (
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-lg shadow-xl border-2 border-amber-300 z-10 min-w-[300px] max-h-96 overflow-y-auto">
+                  <div className="p-2">
+                    <button
+                      onClick={() => {
+                        setSelectedActivityId(null);
+                        setShowOlderActivities(false);
+                      }}
+                      className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
+                        !selectedActivityId
+                          ? 'bg-amber-100 text-amber-800 font-semibold'
+                          : 'hover:bg-gray-100 text-gray-700'
+                      }`}
+                    >
+                      Latest: {latestActivity?.name}
+                    </button>
+                    {olderActivities.map((groupWork) => (
+                      <button
+                        key={groupWork.id}
+                        onClick={() => {
+                          setSelectedActivityId(groupWork.id);
+                          setShowOlderActivities(false);
+                        }}
+                        className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
+                          selectedActivityId === groupWork.id
+                            ? 'bg-amber-100 text-amber-800 font-semibold'
+                            : 'hover:bg-gray-100 text-gray-700'
+                        }`}
+                      >
+                        {groupWork.name}
+                        <span className="text-xs text-gray-500 ml-2">
+                          ({new Date(groupWork.createdAt).toLocaleDateString()})
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
-        </button>
+        </div>
       </div>
 
       {loading ? (
@@ -265,11 +366,16 @@ export default function GroupWorkDemo({ teacherId, classId, onLeaderboardChange 
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {groupWorks.map((groupWork) => (
+        <div className="space-y-6">
+          {/* Display the selected/latest activity */}
+          {displayedActivity && (
+            <div className="grid grid-cols-1 gap-6">
+              {(() => {
+                const groupWork = displayedActivity;
+                return (
             <div
               key={groupWork.id}
-              className="bg-white rounded-xl shadow-lg border-2 border-yellow-300 p-6 pb-7 hover:shadow-xl transition-all duration-200"
+              className="bg-amber-100 bg-opacity-90 rounded-xl p-6 border-2 border-amber-200 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 relative"
             >
               <h3 className="text-xl font-bold text-gray-800 mb-2">{groupWork.name}</h3>
               
@@ -361,7 +467,10 @@ export default function GroupWorkDemo({ teacherId, classId, onLeaderboardChange 
                 </button>
               </div>
             </div>
-          ))}
+                );
+              })()}
+            </div>
+          )}
         </div>
       )}
 

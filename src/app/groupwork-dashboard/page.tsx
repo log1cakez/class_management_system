@@ -71,7 +71,7 @@ function GroupWorkDashboardContent() {
         </div>
 
         {/* Main Content */}
-        <div className="bg-white bg-opacity-95 rounded-3xl p-8 max-w-6xl w-full mx-auto shadow-2xl border-4 border-amber-400">
+        <div className="rounded-3xl p-8 max-w-6xl w-full mx-auto">
           {/* Class Name Display */}
           {className && (
             <div className="text-center mb-6">

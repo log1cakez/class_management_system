@@ -60,6 +60,73 @@ export default function ComplimentModal({
 
   const complimentMessage = generateComplimentMessage();
 
+  // Function to highlight student names in the message
+  const renderMessageWithHighlightedNames = (message: string) => {
+    const parts: (string | React.ReactElement)[] = [];
+    let lastIndex = 0;
+    
+    // Create a sorted list of student names by length (longest first) to avoid partial matches
+    const sortedStudents = [...selectedStudents].sort((a, b) => b.name.length - a.name.length);
+    
+    // Find all student name occurrences with their positions
+    const matches: Array<{ name: string; index: number; length: number }> = [];
+    sortedStudents.forEach((student) => {
+      // Escape special regex characters in the name
+      const escapedName = student.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const nameRegex = new RegExp(`\\b${escapedName}\\b`, 'gi');
+      let match;
+      while ((match = nameRegex.exec(message)) !== null) {
+        matches.push({
+          name: student.name,
+          index: match.index,
+          length: match[0].length
+        });
+      }
+    });
+    
+    // Sort matches by index
+    matches.sort((a, b) => a.index - b.index);
+    
+    // Remove overlapping matches (keep the first one)
+    const nonOverlappingMatches: typeof matches = [];
+    let lastEnd = 0;
+    matches.forEach(match => {
+      if (match.index >= lastEnd) {
+        nonOverlappingMatches.push(match);
+        lastEnd = match.index + match.length;
+      }
+    });
+    
+    // Build the parts array
+    nonOverlappingMatches.forEach((match, i) => {
+      // Add text before the match
+      if (match.index > lastIndex) {
+        parts.push(message.substring(lastIndex, match.index));
+      }
+      
+      // Add highlighted name
+      parts.push(
+        <span key={`highlight-${i}`} className="text-yellow-600 font-bold drop-shadow-sm">
+          {match.name}
+        </span>
+      );
+      
+      lastIndex = match.index + match.length;
+    });
+    
+    // Add remaining text
+    if (lastIndex < message.length) {
+      parts.push(message.substring(lastIndex));
+    }
+    
+    // If no matches found, return the original message
+    if (parts.length === 0) {
+      return message;
+    }
+    
+    return <>{parts}</>;
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       {/* Modal Background */}
@@ -104,7 +171,7 @@ export default function ComplimentModal({
             <div className="text-center mb-8">
               <div className="bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-2xl p-6 border-2 border-yellow-300 shadow-lg">
                 <p className="text-lg font-semibold text-gray-800 leading-relaxed">
-                  {complimentMessage}
+                  {renderMessageWithHighlightedNames(complimentMessage)}
                 </p>
               </div>
             </div>
