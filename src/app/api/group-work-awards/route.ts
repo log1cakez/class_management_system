@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Group ID, points, and teacher ID are required' }, { status: 400 })
     }
 
-    // Verify group exists and get behavior info
+    // Verify group exists and get behavior info, including students
     const group = await prisma.group.findUnique({
       where: { id: groupId },
       include: {
@@ -25,6 +25,11 @@ export async function POST(request: NextRequest) {
                 behavior: true
               }
             }
+          }
+        },
+        students: {
+          include: {
+            student: true
           }
         }
       }
@@ -102,6 +107,47 @@ export async function POST(request: NextRequest) {
     })
 
     console.log('Group work award created successfully:', award.id)
+
+    // Add points to each student in the group
+    if (group.students && group.students.length > 0) {
+      const behaviorName = behavior?.name || 'Group work'
+      const reason = `Group work: ${group.groupWork.name} - ${finalPraise}`
+      
+      // Update each student's points and create point records
+      const studentUpdatePromises = group.students.map(async (groupStudent) => {
+        const studentId = groupStudent.studentId
+        
+        // Update student's total points
+        await prisma.student.update({
+          where: { id: studentId },
+          data: {
+            points: {
+              increment: points
+            }
+          }
+        })
+        
+        // Create point record for tracking
+        await prisma.point.create({
+          data: {
+            studentId,
+            behaviorId: behaviorId || null,
+            points,
+            reason,
+            behaviorName
+          }
+        })
+      })
+      
+      try {
+        await Promise.all(studentUpdatePromises)
+        console.log(`Successfully added ${points} points to ${group.students.length} students in group ${group.name}`)
+      } catch (studentError) {
+        console.error('Error updating student points (non-critical):', studentError)
+        // Don't fail the entire request if student point updates fail
+        // The group award was already created successfully
+      }
+    }
 
     // Return the award with badge information
     return NextResponse.json({
