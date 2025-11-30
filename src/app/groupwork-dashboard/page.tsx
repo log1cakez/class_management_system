@@ -7,18 +7,41 @@ import { IMAGES } from "@/assets/images/config";
 import NavigationButtons from "@/components/NavigationButtons";
 import GroupWorkDemo from "@/components/GroupWorkDemo";
 import GroupLeaderboard from "@/components/GroupLeaderboard";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BehaviorManagementModal from "@/components/BehaviorManagementModal";
 
 function GroupWorkDashboardContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const classId = searchParams.get("classId");
-  const className = searchParams.get("className");
+  const classNameFromUrl = searchParams.get("className");
   const teacherId = searchParams.get("teacherId");
 
   const [showManageBehaviors, setShowManageBehaviors] = useState(false);
   const [groupsForLeaderboard, setGroupsForLeaderboard] = useState<{id:string;name:string;points:number}[]>([]);
+  const [className, setClassName] = useState<string | null>(classNameFromUrl);
+
+  // Fetch class name if not in URL but classId is available
+  useEffect(() => {
+    const fetchClassName = async () => {
+      if (!className && classId && teacherId) {
+        try {
+          const response = await fetch(`/api/classes?teacherId=${teacherId}`);
+          if (response.ok) {
+            const classes = await response.json();
+            const foundClass = classes.find((c: any) => c.id === classId);
+            if (foundClass && foundClass.name) {
+              setClassName(foundClass.name);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching class name:", error);
+        }
+      }
+    };
+
+    fetchClassName();
+  }, [classId, className, teacherId]);
 
   return (
     <main className="min-h-screen relative overflow-hidden">
@@ -44,6 +67,11 @@ function GroupWorkDashboardContent() {
               <h1 className="text-3xl font-bold text-orange-500 text-center drop-shadow-sm">
                 GROUP WORK ACTIVITIES
               </h1>
+              {className && (
+                <p className="text-xl text-gray-800 font-bold text-center mt-3">
+                  CLASS: {className}
+                </p>
+              )}
             </div>
           </div>
 
@@ -69,14 +97,7 @@ function GroupWorkDashboardContent() {
 
         {/* Main Content */}
         <div className="rounded-3xl p-8 max-w-6xl w-full mx-auto">
-          {/* Class Name Display */}
-          {className && (
-            <div className="text-center mb-6">
-              <div className="text-lg text-gray-700 font-semibold">
-                Class: {className}
-              </div>
-            </div>
-          )}
+       
 
           {/* Manage Behaviors Button */}
           <div className="flex justify-center mb-6">
