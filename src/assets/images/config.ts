@@ -1,7 +1,7 @@
 // Image configuration - update these paths as needed
 export const IMAGES = {
   // Background images
-  HOMEPAGE_BG: '/images/Picture1.png',
+  HOMEPAGE_BG: '/bg.mp4',
   
   // Logo and branding
   LOGO: '/images/logo.png', // Add your logo here

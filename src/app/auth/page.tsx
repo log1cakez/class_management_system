@@ -76,16 +76,15 @@ export default function AuthPage() {
 
   return (
     <main className="min-h-screen relative overflow-hidden">
-      {/* Background Image */}
+      {/* Background Video */}
       <div className="absolute inset-0 z-0">
-        <Image
+        <video
           src={IMAGES.HOMEPAGE_BG}
-          alt="Authentication Background"
-          fill
-          className="object-cover object-center"
-          priority
-          sizes="100vw"
-          quality={85}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover object-center"
         />
       </div>
 

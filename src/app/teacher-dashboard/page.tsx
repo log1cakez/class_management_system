@@ -50,14 +50,15 @@ function TeacherDashboardContent() {
 
   return (
     <main className="min-h-screen relative overflow-hidden">
-      {/* Background Image */}
+      {/* Background Video */}
       <div className="absolute inset-0 z-0">
-        <Image
+        <video
           src={IMAGES.HOMEPAGE_BG}
-          alt="Background"
-          fill
-          className="object-cover"
-          priority
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover object-center"
         />
       </div>
 

@@ -139,14 +139,13 @@ export default function BehaviorSelectionModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       {/* Modal Background */}
       <div className="relative w-full h-full">
-        <Image
+        <video
           src={IMAGES.HOMEPAGE_BG}
-          alt="Behavior Selection Background"
-          fill
-          className="object-cover object-center"
-          priority
-          sizes="100vw"
-          quality={85}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover object-center"
         />
 
         {/* Modal Content */}
