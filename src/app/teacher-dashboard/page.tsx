@@ -144,7 +144,7 @@ function TeacherDashboardContent() {
             {classes.map((classItem) => (
               <div
                 key={classItem.id}
-                className="bg-opacity-90 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 relative cursor-pointer"
+                className="bg-[rgba(255,255,255,0.5)] rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 relative cursor-pointer"
                 onClick={() => navigateToClass(classItem.id, classItem.name)}
               >
                 {/* Delete Button - Top Right */}

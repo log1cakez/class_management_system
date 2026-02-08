@@ -121,7 +121,7 @@ function IndividualTaskContent() {
           {/* Individual Task Title */}
           <div className="flex-1">
             <div className="rounded-2xl px-8 py-4 shadow-lg mx-auto max-w-md">
-              <h1 className="text-3xl font-bold text-center drop-shadow-sm" style={{ color: "#FFDF73" }}>
+              <h1 className="text-4xl font-bold text-center drop-shadow-sm" style={{ color: "#FFDF73" }}>
                 INDIVIDUAL TASK
               </h1>
             </div>
@@ -157,7 +157,7 @@ function IndividualTaskContent() {
         {/* Error State */}
         {error && (
           <div className="flex justify-center items-center min-h-96">
-            <div className="text-2xl font-bold text-red-600">
+            <div className="text-3xl font-bold text-red-600">
               Error: {error}
             </div>
           </div>
@@ -166,7 +166,7 @@ function IndividualTaskContent() {
         {/* No Class Selected */}
         {!classId && !loading && (
           <div className="flex justify-center items-center min-h-96">
-            <div className="text-2xl font-bold text-yellow-600">
+            <div className="text-3xl font-bold text-yellow-600">
               Please select a class first
             </div>
           </div>
@@ -214,7 +214,7 @@ function IndividualTaskContent() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 pr-50 pl-50">
             {students.map((student) => (
-              <div key={student.id} className="text-center">
+              <div key={student.id} className="bg-[rgba(255,255,255,0.5)] rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 relative">
                 {/* Student Card */}
                 <div className="student-card">
                   {/* Character with points badge */}
@@ -288,11 +288,11 @@ function IndividualTaskContent() {
             {addingPoints ? (
               <>
                 <LoadingSpinner size="sm" />
-                <span className="text-lg">Processing...</span>
+                <span className="text-xl">Processing...</span>
               </>
             ) : (
               <>
-                <span className="text-lg">NEXT</span>
+                <span className="text-xl">NEXT</span>
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
@@ -340,7 +340,7 @@ export default function IndividualTaskPage() {
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500 mx-auto mb-4"></div>
-            <p className="text-lg text-gray-600">Loading task page...</p>
+            <p className="text-xl text-gray-600">Loading task page...</p>
           </div>
         </div>
       }

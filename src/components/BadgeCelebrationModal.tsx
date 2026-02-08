@@ -112,7 +112,7 @@ export default function BadgeCelebrationModal({
         
         {/* Badge with magical animation */}
         <div className="mb-6 relative">
-          <div className={`w-32 h-32 relative rounded-full overflow-hidden mx-auto transform transition-all duration-1000 ${
+          <div className={`w-48 h-48 relative rounded-full overflow-hidden mx-auto transform transition-all duration-1000 ${
             showBadge ? 'scale-100 rotate-0' : 'scale-0 rotate-180'
           }`}>
             
@@ -144,19 +144,19 @@ export default function BadgeCelebrationModal({
         <h2 className={`text-3xl font-bold bg-gradient-to-r from-yellow-600 via-red-500 to-pink-500 bg-clip-text text-transparent mb-3 transform transition-all duration-1000 relative z-10 ${
           showBadge ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
-          🎉 CONGRATULATIONS {currentBadge.groupName ? `"${currentBadge.groupName}"` : ''}! 🎉
+          CONGRATULATIONS {currentBadge.groupName ? `"${currentBadge.groupName}"` : ''}!
         </h2>
         
         <p className={`text-lg text-gray-700 mb-3 font-semibold transform transition-all duration-1000 delay-200 relative z-10 ${
           showBadge ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
-          ✨ You've earned a badge! ✨
+          You've earned a badge!
         </p>
         
         <p className={`text-xl text-gray-800 mb-6 font-bold transform transition-all duration-1000 delay-400 relative z-10 ${
           showBadge ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
         }`}>
-          ✨ "{currentBadge.praise || currentBadge.description}" ✨
+          "{currentBadge.praise || currentBadge.description}"
         </p>
         
         {/* Badge counter with magical effect */}
@@ -181,7 +181,7 @@ export default function BadgeCelebrationModal({
             onClick={handleNextBadge}
             className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white px-8 py-3 rounded-2xl font-bold text-lg shadow-lg transform transition-all duration-300 hover:scale-110 hover:shadow-xl active:scale-95"
           >
-            {currentBadgeIndex < badges.length - 1 ? '✨ Next Badge ✨' : '🎉 Awesome! 🎉'}
+            {currentBadgeIndex < badges.length - 1 ? 'Next Badge' : 'Awesome!'}
           </button>
         </div>
         

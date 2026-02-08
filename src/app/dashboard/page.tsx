@@ -205,7 +205,7 @@ function DashboardContent() {
             {students.map((student) => (
               <div
                 key={student.id}
-                className="bg-opacity-90 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 relative"
+                className="bg-[rgba(255,255,255,0.5)] rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 relative"
               >
                 {/* Points Display - Top Right */}
                 <div className="absolute top-2 right-2 bg-yellow-400 px-4 py-3 rounded-full border-2 border-yellow-500 shadow-lg">
