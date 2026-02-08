@@ -1,0 +1,67 @@
+/* Bubble glossy button style for GroupWorkDemo */
+.bubble-glossy-btn {
+  position: relative;
+  display: inline-block;
+  border: none;
+  outline: none;
+  border-radius: 999px;
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 4px 16px 0 rgba(0,0,0,0.10), 0 1.5px 0 0 #fff inset;
+  padding: 0.75rem 2rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  overflow: hidden;
+  background: none;
+}
+
+/* Color variants for bubble glossy buttons */
+.bubble-blue {
+  background: linear-gradient(145deg, #3b82f6 0%, #2563eb 100%);
+}
+.bubble-green {
+  background: linear-gradient(145deg, #22c55e 0%, #16a34a 100%);
+}
+.bubble-yellow {
+  background: linear-gradient(145deg, #fde68a 0%, #fbbf24 100%);
+  color: #7c4a00;
+}
+.bubble-indigo {
+  background: linear-gradient(145deg, #6366f1 0%, #4338ca 100%);
+}
+.bubble-red {
+  background: linear-gradient(145deg, #ef4444 0%, #b91c1c 100%);
+}
+.bubble-amber {
+  background: linear-gradient(145deg, #fbbf24 0%, #f59e42 100%);
+  color: #7c4a00;
+}
+.bubble-lime {
+  background: linear-gradient(145deg, #a3e635 0%, #84cc16 100%);
+  color: #365314;
+}
+.bubble-glossy-btn:before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 20%;
+  width: 60%;
+  height: 40%;
+  background: rgba(255,255,255,0.35);
+  border-radius: 50%;
+  filter: blur(2px);
+  pointer-events: none;
+  z-index: 1;
+}
+.bubble-glossy-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 8px 32px 0 rgba(0,0,0,0.18), 0 1.5px 0 0 #fff inset;
+}
+.bubble-glossy-btn:active {
+  transform: scale(0.98);
+}
+.bubble-glossy-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

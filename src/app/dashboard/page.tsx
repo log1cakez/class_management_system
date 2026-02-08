@@ -100,8 +100,8 @@ function DashboardContent() {
         <div className="flex justify-between items-center mb-8">
           {/* Dashboard Title */}
           <div className="flex-1">
-            <div className="bg-amber-100 rounded-2xl px-8 py-4 border-2 border-amber-800 shadow-lg mx-auto max-w-md">
-              <h1 className="text-3xl font-bold text-orange-500 text-center drop-shadow-sm">
+            <div className="rounded-2xl px-8 py-4 shadow-lg mx-auto max-w-md">
+              <h1 className="text-3xl font-bold text-center drop-shadow-sm" style={{ color: "#FFDF73" }}>
                 {className ? `${className.toUpperCase()} DASHBOARD` : "CLASS DASHBOARD"}
               </h1>
             </div>
@@ -205,7 +205,7 @@ function DashboardContent() {
             {students.map((student) => (
               <div
                 key={student.id}
-                className="bg-amber-100 bg-opacity-90 rounded-xl p-6 border-2 border-amber-200 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 relative"
+                className="bg-opacity-90 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 relative"
               >
                 {/* Points Display - Top Right */}
                 <div className="absolute top-2 right-2 bg-yellow-400 px-4 py-3 rounded-full border-2 border-yellow-500 shadow-lg">

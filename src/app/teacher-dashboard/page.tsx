@@ -66,8 +66,8 @@ function TeacherDashboardContent() {
       <div className="relative z-10 pt-20 pb-20">
         {/* Header */}
         <div className="flex-1">
-          <div className="bg-amber-100 rounded-2xl px-8 py-4 border-2 border-amber-800 shadow-lg mx-auto max-w-md">
-            <h1 className="text-3xl font-bold text-orange-500 text-center drop-shadow-sm">
+          <div className="rounded-2xl px-8 py-4 shadow-lg mx-auto max-w-md">
+            <h1 className="text-3xl font-bold text-center drop-shadow-sm" style={{ color: "#FFDF73" }}>
               CLASS DASHBOARD
             </h1>
           </div>
@@ -144,7 +144,7 @@ function TeacherDashboardContent() {
             {classes.map((classItem) => (
               <div
                 key={classItem.id}
-                className="bg-amber-100 bg-opacity-90 rounded-xl p-6 border-2 border-amber-200 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 relative cursor-pointer"
+                className="bg-opacity-90 rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 relative cursor-pointer"
                 onClick={() => navigateToClass(classItem.id, classItem.name)}
               >
                 {/* Delete Button - Top Right */}

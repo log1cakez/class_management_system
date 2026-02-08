@@ -120,8 +120,8 @@ function IndividualTaskContent() {
         <div className="flex justify-between items-center mb-8">
           {/* Individual Task Title */}
           <div className="flex-1">
-            <div className="bg-amber-100 rounded-2xl px-8 py-4 border-2 border-amber-800 shadow-lg mx-auto max-w-md">
-              <h1 className="text-3xl font-bold text-orange-500 text-center drop-shadow-sm">
+            <div className="rounded-2xl px-8 py-4 shadow-lg mx-auto max-w-md">
+              <h1 className="text-3xl font-bold text-center drop-shadow-sm" style={{ color: "#FFDF73" }}>
                 INDIVIDUAL TASK
               </h1>
             </div>
@@ -260,7 +260,7 @@ function IndividualTaskContent() {
                       type="checkbox"
                       checked={student.isSelected}
                       onChange={() => toggleStudentSelection(student.id)}
-                      className="w-5 h-5 text-yellow-600 bg-amber-100 border-2 border-amber-800 rounded focus:ring-yellow-500 focus:ring-2"
+                      className="w-5 h-5 text-yellow-600 rounded focus:ring-yellow-500 focus:ring-2"
                     />
                   </label>
                 </div>

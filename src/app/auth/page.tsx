@@ -93,7 +93,7 @@ export default function AuthPage() {
         <div className="bg-white bg-opacity-95 rounded-3xl p-8 max-w-md w-full shadow-2xl border-4 border-yellow-400">
           {/* Title */}
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-yellow-600 mb-2">
+            <h1 className="text-3xl font-bold text-center drop-shadow-sm mb-2" style={{ color: "#FFDF73" }}>
               {isLogin ? "TEACHER LOGIN" : "TEACHER REGISTRATION"}
             </h1>
             <p className="text-gray-600">
