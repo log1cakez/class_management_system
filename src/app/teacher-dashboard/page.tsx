@@ -66,8 +66,8 @@ function TeacherDashboardContent() {
       <div className="relative z-10 pt-20 pb-20">
         {/* Header */}
         <div className="flex-1">
-          <div className="rounded-2xl px-8 py-4 shadow-lg mx-auto max-w-md">
-            <h1 className="text-3xl font-bold text-center drop-shadow-sm" style={{ color: "#FFDF73" }}>
+          <div className="bg-[rgba(255,255,255,0.5)] rounded-2xl px-8 py-4 shadow-lg mx-auto max-w-md">
+            <h1 className="text-3xl font-bold text-center drop-shadow-sm" style={{ color: "#F0B100" }}>
               CLASS DASHBOARD
             </h1>
           </div>

@@ -100,8 +100,8 @@ function DashboardContent() {
         <div className="flex justify-between items-center mb-8">
           {/* Dashboard Title */}
           <div className="flex-1">
-            <div className="rounded-2xl px-8 py-4 shadow-lg mx-auto max-w-md">
-              <h1 className="text-3xl font-bold text-center drop-shadow-sm" style={{ color: "#FFDF73" }}>
+            <div className="bg-[rgba(255,255,255,0.5)] rounded-2xl px-8 py-4 shadow-lg mx-auto max-w-md">
+              <h1 className="text-3xl font-bold text-center drop-shadow-sm" style={{ color: "#F0B100" }}>
                 {className ? `${className.toUpperCase()} DASHBOARD` : "CLASS DASHBOARD"}
               </h1>
             </div>
@@ -291,7 +291,7 @@ function DashboardContent() {
             <div className="flex gap-6 justify-center">
               {/* Individual Task Option */}
               <div
-                className="bg-pink-400 hover:bg-pink-500 rounded-2xl p-6 cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg border-2 border-pink-500 min-w-[200px] text-center"
+                className="bg-[#FF7DB0] hover:bg-pink-500 rounded-2xl p-6 cursor-pointer transition-all duration-200 hover:scale-105 shadow-lg border-2 border-pink-500 min-w-[200px] text-center"
                 onClick={() => {
                   setShowTaskModal(false);
                   window.location.href = `/individual_task${classId && teacherId

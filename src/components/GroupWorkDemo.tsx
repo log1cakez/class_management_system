@@ -421,45 +421,56 @@ export default function GroupWorkDemo({
                       {groupWork.name}
                     </h3>
 
-                    <div className="mb-4">
-                      <p className="text-sm font-semibold text-gray-700 mb-1">
-                        Groups ({groupWork.groups.length}):
-                      </p>
-                      <div className="space-y-1">
-                        {groupWork.groups.map((group) => {
-                          const points =
-                            groupPoints[groupWork.id]?.[group.id] || 0;
-                          return (
-                            <div
-                              key={group.id}
-                              className="text-sm text-gray-600 flex justify-between items-center"
-                            >
-                              <span>
-                                • {group.name} ({group.students.length}{" "}
-                                students)
-                              </span>
-                              <span className="text-green-600 font-semibold">
-                                {points} {points === 1 ? "pt" : "pts"}
-                              </span>
-                            </div>
-                          );
-                        })}
+                    <div className="mb-4 flex flex-row gap-4">
+                      {/* Groups Box */}
+                      <div className="flex-1 bg-[#FFF6D6] border-2 border-[#F7D77A] rounded-xl p-4 shadow" style={{ minWidth: 0 }}>
+                        <p className="text-base font-bold text-[#D1A100] mb-2">
+                          Groups <span className="font-normal text-gray-700">({groupWork.groups.length})</span>:
+                        </p>
+                        <div className="space-y-2">
+                          {groupWork.groups.map((group, idx) => {
+                            const points = groupPoints[groupWork.id]?.[group.id] || 0;
+                            // Optional: Add emoji icons for group (demo only, you can map by idx or group name)
+                            const groupIcons = [
+                              '🐶', // paw patrol
+                              '🐱', // meow patrol
+                              '🐥', // quack patrol
+                            ];
+                            return (
+                              <div
+                                key={group.id}
+                                className="flex items-center justify-between text-base font-medium text-[#3B2E07]"
+                              >
+                                <span className="flex items-center gap-2">
+                                  <span className="font-bold text-[#2B7A2B]">{group.name}</span>
+                                  <span className="text-gray-500 font-normal">({group.students.length} students)</span>
+                                </span>
+                                <span className={`font-bold ${points > 0 ? 'text-[#2B7A2B]' : 'text-gray-500'}`}>{points} pt{points === 1 ? '' : 's'}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-
-                    <div className="mb-4">
-                      <p className="text-sm font-semibold text-gray-700 mb-1">
-                        Behaviors ({groupWork.behaviors.length}):
-                      </p>
-                      <div className="space-y-1">
-                        {groupWork.behaviors.map((b) => (
-                          <div
-                            key={b.behaviorId}
-                            className="text-sm text-gray-600"
-                          >
-                            • {b.behavior.name}
-                          </div>
-                        ))}
+                      {/* Behaviors Box */}
+                      <div className="flex-1 bg-[#DDF3D6] border-2 border-[#7ED957] rounded-xl p-4 shadow" style={{ minWidth: 0 }}>
+                        <p className="text-base font-bold text-[#2B7A2B] mb-2">
+                          Behaviors <span className="font-normal text-gray-700">({groupWork.behaviors.length})</span>:
+                        </p>
+                        <div className="space-y-2">
+                          {groupWork.behaviors.map((b, idx) => {
+                            return (
+                              <div
+                                key={b.behaviorId}
+                                className="flex items-center justify-between text-base font-medium text-[#3B2E07]"
+                              >
+                                <span className="flex items-center gap-2">
+                                  <span className="font-bold text-[#2B7A2B]">{b.behavior.name}</span>
+                                </span>
+                                <span className="font-bold text-[#2B7A2B]">+1 pt</span>
+                              </div>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
 

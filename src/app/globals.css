@@ -33,7 +33,7 @@ body, .bubble-font {
 
 /* Individual task student card styles */
 .student-card {
-  @apply bg-transparent rounded-lg p-2 border border-gray-200 shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105 mb-2 overflow-visible;
+  @apply bg-transparent rounded-lg p-2 transition-all duration-200 hover:scale-105 mb-2 overflow-visible;
 }
 
 .student-avatar {

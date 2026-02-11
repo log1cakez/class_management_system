@@ -8,12 +8,14 @@ interface BadgeCelebrationModalProps {
   isOpen: boolean;
   badges: (RewardBadge & { praise?: string; groupName?: string })[];
   onClose: () => void;
+  badgeSizePx?: number; // Optional prop for badge size in px
 }
 
 export default function BadgeCelebrationModal({ 
   isOpen, 
   badges, 
-  onClose 
+  onClose,
+  badgeSizePx = 220 // Default to 220px, larger than before
 }: BadgeCelebrationModalProps) {
   const [currentBadgeIndex, setCurrentBadgeIndex] = useState(0);
   const [showBadge, setShowBadge] = useState(false);
@@ -112,16 +114,17 @@ export default function BadgeCelebrationModal({
         
         {/* Badge with magical animation */}
         <div className="mb-6 relative">
-          <div className={`w-48 h-48 relative rounded-full overflow-hidden mx-auto transform transition-all duration-1000 ${
-            showBadge ? 'scale-100 rotate-0' : 'scale-0 rotate-180'
-          }`}>
-            
+          <div
+            className={`relative rounded-full overflow-hidden mx-auto transform transition-all duration-1000 ${
+              showBadge ? 'scale-100 rotate-0' : 'scale-0 rotate-180'
+            }`}
+            style={{ width: badgeSizePx, height: badgeSizePx }}
+          >
             <img
               src={currentBadge.imagePath}
               alt={currentBadge.name}
               className="w-full h-full object-cover relative z-20 animate-pulse rounded-full"
             />
-            
             {/* Magical sparkles around badge */}
             <div className="absolute inset-0 pointer-events-none">
               {[...Array(8)].map((_, i) => (

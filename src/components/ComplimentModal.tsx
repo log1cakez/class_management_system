@@ -42,17 +42,16 @@ export default function ComplimentModal({
 
   // Generate dynamic compliment message
   const generateComplimentMessage = () => {
-    const studentNames = selectedStudents.map((s) => s.name).join(", ");
     const behaviorNames = selectedBehaviors
       .map((b) => b.name.toLowerCase())
       .join(", ");
 
     const compliments = [
-      `Well done, ${studentNames}! Your ${behaviorNames} made a real difference – your voices mattered and truly brightened the discussion.`,
-      `Excellent work, ${studentNames}! Your ${behaviorNames} shows great dedication and really contributed to our learning environment.`,
-      `Outstanding effort, ${studentNames}! Your ${behaviorNames} demonstrates wonderful engagement and helps create a positive classroom atmosphere.`,
-      `Fantastic job, ${studentNames}! Your ${behaviorNames} is exactly what makes our class special and inspiring for everyone.`,
-      `Amazing work, ${studentNames}! Your ${behaviorNames} shows incredible commitment and makes our classroom a better place to learn.`,
+      `Well done! Your ${behaviorNames} made a real difference – it truly brightened the discussion.`,
+      `Excellent work! Your ${behaviorNames} shows great dedication and really contributed to our learning environment.`,
+      `Outstanding effort! Your ${behaviorNames} demonstrates wonderful engagement and helps create a positive classroom atmosphere.`,
+      `Fantastic job! Your ${behaviorNames} is exactly what makes our class special and inspiring for everyone.`,
+      `Amazing work! Your ${behaviorNames} shows incredible commitment and makes our classroom a better place to learn.`,
     ];
 
     return compliments[Math.floor(Math.random() * compliments.length)];
@@ -167,46 +166,36 @@ export default function ComplimentModal({
               </div>
             </div>
 
-            {/* Compliment Message */}
-            <div className="text-center mb-8">
-              <div className="bg-gradient-to-r from-yellow-100 to-yellow-200 rounded-2xl p-6 border-2 border-yellow-300 shadow-lg">
-                <p className="text-lg font-semibold text-gray-800 leading-relaxed">
-                  {renderMessageWithHighlightedNames(complimentMessage)}
+            {/* Compliment Message & Details - Custom Layout */}
+            <div className="flex flex-col items-center mb-8">
+              {/* Compliment Box */}
+              <div className="w-full max-w-2xl bg-gradient-to-b from-yellow-200 to-yellow-100 border-2 border-yellow-300 rounded-2xl shadow-lg p-6 mb-4 flex flex-col items-center">
+                <p className="text-xl font-bold text-gray-900 mb-2 text-center">
+                  {complimentMessage.split('!')[0]}!
+                </p>
+                <p className="text-base text-gray-800 text-center">
+                  {complimentMessage.split('!').slice(1).join('!').trim()}
                 </p>
               </div>
-            </div>
-
-            {/* Selected Details */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {/* Students */}
-              <div className="bg-blue-50 rounded-xl p-4 border-2 border-blue-200">
-                <h3 className="text-lg font-bold text-blue-800 mb-3 text-center">
-                  Students Recognized
-                </h3>
-                <div className="flex flex-wrap gap-2 justify-center">
+              {/* Behavior Bar */}
+              {selectedBehaviors.length > 0 && (
+                <div className="w-full max-w-2xl flex justify-center mb-4">
+                  <div className="bg-green-500 border-2 border-green-700 rounded-full px-6 py-2 shadow text-white font-bold text-base text-center">
+                    Behavior Demonstrated: <span className="uppercase">{selectedBehaviors.map(b => b.name).join(', ')}</span>
+                  </div>
+                </div>
+              )}
+              {/* Students Recognized */}
+              <div className="w-full max-w-2xl bg-white bg-opacity-80 rounded-2xl border-2 border-blue-200 shadow p-6 flex flex-col items-center">
+                <h3 className="text-2xl font-bold text-blue-800 mb-4 text-center tracking-wide">Students Recognized</h3>
+                <div className="flex flex-wrap gap-3 justify-center">
                   {selectedStudents.map((student) => (
                     <span
                       key={student.id}
-                      className="bg-blue-400 text-blue-900 px-3 py-1 rounded-full text-sm font-semibold"
+                      className="bg-blue-400 text-white px-5 py-2 rounded-full text-base font-bold shadow border-2 border-blue-600 tracking-wide"
+                      style={{ letterSpacing: '0.04em' }}
                     >
-                      {student.name}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Behaviors */}
-              <div className="bg-green-50 rounded-xl p-4 border-2 border-green-200">
-                <h3 className="text-lg font-bold text-green-800 mb-3 text-center">
-                  Behaviors Demonstrated
-                </h3>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {selectedBehaviors.map((behavior) => (
-                    <span
-                      key={behavior.id}
-                      className="bg-green-400 text-green-900 px-3 py-1 rounded-full text-sm font-semibold"
-                    >
-                      {behavior.name}
+                      {student.name.toUpperCase()}
                     </span>
                   ))}
                 </div>
