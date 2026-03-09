@@ -11,13 +11,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Teacher ID is required' }, { status: 400 })
     }
 
-    // Only fetch classes that belong to this teacher
     const teacherClasses = await prisma.class.findMany({
       where: { teacherId },
-      include: {
-        students: true
-      },
-      orderBy: { createdAt: 'desc' }
+      include: { students: true },
+      orderBy: { createdAt: 'desc' },
     })
 
     return NextResponse.json(teacherClasses)

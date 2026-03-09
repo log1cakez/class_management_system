@@ -64,6 +64,29 @@ export function useClasses(teacherId: string | null) {
     }
   };
 
+  const updateClass = async (classId: string, name: string) => {
+    if (!teacherId) throw new Error("No teacher ID");
+
+    setError(null);
+    try {
+      const response = await fetch(`/api/classes?id=${classId}&teacherId=${teacherId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), teacherId }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to update class");
+      }
+
+      const updated = await response.json();
+      setClasses((prev) => prev.map((c) => (c.id === classId ? { ...c, name: updated.name } : c)));
+      return updated;
+    } catch (err) {
+      throw err;
+    }
+  };
+
   const deleteClass = async (classId: string) => {
     setDeletingClass(true);
     setError(null);
@@ -96,6 +119,7 @@ export function useClasses(teacherId: string | null) {
     creatingClass,
     deletingClass,
     createClass,
+    updateClass,
     deleteClass,
     refetch: fetchClasses,
   };

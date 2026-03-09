@@ -163,6 +163,51 @@ export function useStudents(classId: string | null, teacherId: string | null) {
     }
   }
 
+  const updateStudent = async (studentId: string, updates: { name?: string; points?: number }) => {
+    if (!teacherId) throw new Error('Teacher ID is required')
+    if (!updates.name?.trim() && updates.points === undefined) return
+
+    setError(null)
+    try {
+      const response = await fetch('/api/students', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: studentId, teacherId, ...updates })
+      })
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Failed to update student')
+      }
+      const updated = await response.json()
+      setStudents(prev =>
+        prev.map(s => (s.id === studentId ? { ...updated, isSelected: s.isSelected } : s))
+      )
+      return updated
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+      throw err
+    }
+  }
+
+  const deleteStudent = async (studentId: string) => {
+    if (!teacherId) throw new Error('Teacher ID is required')
+
+    setError(null)
+    try {
+      const response = await fetch(`/api/students?id=${studentId}&teacherId=${teacherId}`, {
+        method: 'DELETE'
+      })
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}))
+        throw new Error(data.error || 'Failed to delete student')
+      }
+      setStudents(prev => prev.filter(s => s.id !== studentId))
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred')
+      throw err
+    }
+  }
+
   useEffect(() => {
     fetchStudents()
   }, [fetchStudents])
@@ -178,6 +223,8 @@ export function useStudents(classId: string | null, teacherId: string | null) {
     toggleSelectAll,
     sortStudents,
     createStudent,
+    updateStudent,
+    deleteStudent,
     refetch: fetchStudents,
   }
 }

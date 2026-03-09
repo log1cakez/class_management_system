@@ -272,7 +272,7 @@ function IndividualTaskContent() {
             <div className="space-y-6">
               <StudentLeaderboard
                 students={students.map(s => ({ id: s.id, name: s.name, points: s.points }))}
-                title="Student Stars Leaderboard"
+                title="Learner Stars Leaderboard"
               />
             </div>
           </div>

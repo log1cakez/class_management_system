@@ -17,15 +17,16 @@ function DashboardContent() {
   const className = searchParams.get("className");
   const teacherId = searchParams.get("teacherId");
 
-  const { students, loading, error, createStudent, creatingStudent } = useStudents(
-    classId,
-    teacherId
-  );
+  const { students, loading, error, createStudent, creatingStudent, updateStudent, deleteStudent } =
+    useStudents(classId, teacherId);
 
   const [newStudentName, setNewStudentName] = useState("");
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showRewardsModal, setShowRewardsModal] = useState(false);
   const [showGroupWorkModal, setShowGroupWorkModal] = useState(false);
+  const [editingStudent, setEditingStudent] = useState<{ id: string; name: string } | null>(null);
+  const [editStudentName, setEditStudentName] = useState("");
+  const [editStudentLoading, setEditStudentLoading] = useState(false);
 
   const { createGroupWork, creatingGroupWork } = useGroupWorks(teacherId);
 
@@ -36,15 +37,40 @@ function DashboardContent() {
         setNewStudentName("");
       } catch (error) {
         console.error("Error adding student:", error);
-        alert("Failed to add student. Please try again.");
+        alert("Failed to add learner. Please try again.");
       }
     }
   };
 
-  const removeStudent = (id: string) => {
-    // For now, we'll just filter locally since we don't have a delete API
-    // In a real app, you'd call a delete API here
-    console.log("Remove student:", id);
+  const openEditStudent = (student: { id: string; name: string }) => {
+    setEditingStudent(student);
+    setEditStudentName(student.name);
+  };
+
+  const handleUpdateStudent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingStudent || !editStudentName.trim()) return;
+    setEditStudentLoading(true);
+    try {
+      await updateStudent(editingStudent.id, { name: editStudentName.trim().toUpperCase() });
+      setEditingStudent(null);
+    } catch (error) {
+      console.error("Error updating student:", error);
+      alert("Failed to update student. Please try again.");
+    } finally {
+      setEditStudentLoading(false);
+    }
+  };
+
+  const handleDeleteStudent = async (id: string) => {
+    if (confirm("Are you sure you want to remove this student? This will delete their points history.")) {
+      try {
+        await deleteStudent(id);
+      } catch (error) {
+        console.error("Error deleting student:", error);
+        alert("Failed to delete student. Please try again.");
+      }
+    }
   };
 
   const handleGroupWorkRedirect = () => {
@@ -78,8 +104,7 @@ function DashboardContent() {
     <main className="min-h-screen relative overflow-hidden">
       {/* Background Video */}
       <div
-        className={`absolute inset-0 z-0 transition-all duration-300 ${showTaskModal || showRewardsModal || showGroupWorkModal ? "blur-sm" : ""
-          }`}
+        className={`absolute inset-0 z-0 transition-all duration-300 ${showTaskModal || showRewardsModal || showGroupWorkModal || editingStudent ? "blur-sm" : ""}`}
       >
         <video
           src={IMAGES.HOMEPAGE_BG}
@@ -93,8 +118,7 @@ function DashboardContent() {
 
       {/* Content Overlay */}
       <div
-        className={`relative z-10 min-h-screen p-8 transition-all duration-300 ${showTaskModal || showRewardsModal ? "blur-sm" : ""
-          }`}
+        className={`relative z-10 min-h-screen p-8 transition-all duration-300 ${showTaskModal || showRewardsModal || editingStudent ? "blur-sm" : ""}`}
       >
         {/* Header Section */}
         <div className="flex justify-between items-center mb-8">
@@ -144,7 +168,7 @@ function DashboardContent() {
               </svg>
             </div>
             <span className="text-2xl font-bold text-yellow-400 drop-shadow-lg">
-              Add student
+              Add Learner
             </span>
           </div>
 
@@ -214,10 +238,23 @@ function DashboardContent() {
                   </span>
                 </div>
 
-                {/* Remove Button - Top Left */}
-                <div className="absolute top-2 left-2">
+                {/* Edit & Remove Buttons - Top Left */}
+                <div className="absolute top-2 left-2 flex gap-2">
                   <button
-                    onClick={() => removeStudent(student.id)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openEditStudent(student);
+                    }}
+                    className="px-3 py-2 bg-blue-400 hover:bg-blue-500 text-white text-sm rounded-full transition-all duration-200 hover:scale-105 shadow-lg border-2 border-blue-500"
+                    title="Edit student"
+                  >
+                    ✎
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteStudent(student.id);
+                    }}
                     className="px-3 py-2 bg-red-400 hover:bg-red-500 text-white text-sm rounded-full transition-all duration-200 hover:scale-105 shadow-lg border-2 border-red-500"
                   >
                     ×
@@ -272,6 +309,50 @@ function DashboardContent() {
           Rewards
         </button>
       </div>
+
+      {/* Edit Student Modal */}
+      {editingStudent && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+          onClick={() => setEditingStudent(null)}
+        >
+          <div
+            className="bg-white rounded-2xl p-6 max-w-md w-full mx-4 shadow-2xl border-2 border-yellow-400"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="text-xl font-bold text-yellow-700 mb-4">Edit Learner</h2>
+            <form onSubmit={handleUpdateStudent} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Learner's Name</label>
+                <input
+                  type="text"
+                  value={editStudentName}
+                  onChange={(e) => setEditStudentName(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-gray-800"
+                  placeholder="Enter student name"
+                  required
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={editStudentLoading}
+                  className="flex-1 px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-lg disabled:opacity-50"
+                >
+                  {editStudentLoading ? "Saving..." : "Save"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingStudent(null)}
+                  className="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold rounded-lg"
+                >
+                  Cancel
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Task Selection Modal */}
       {showTaskModal && (

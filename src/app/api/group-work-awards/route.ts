@@ -39,6 +39,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Group not found' }, { status: 404 })
     }
 
+    if (group.groupWork.teacherId !== teacherId) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    }
+
     // Get behavior info and predefined praise if behaviorId is provided
     let behavior = null
     let predefinedPraise = null

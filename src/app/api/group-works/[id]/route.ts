@@ -4,23 +4,19 @@ import { prisma } from "@/lib/prisma";
 // PUT /api/group-works/[id] - Update a group work
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
     const body = await request.json();
     const { name, behaviorIds, groups, teacherId, behaviorPraises } = body;
-    const { id } = params;
 
     if (!teacherId) {
       return NextResponse.json({ error: "Teacher ID is required" }, { status: 400 });
     }
 
-    // Verify the group work belongs to the teacher
     const existingGroupWork = await prisma.groupWork.findFirst({
-      where: {
-        id: id,
-        teacherId: teacherId,
-      },
+      where: { id, teacherId },
     });
 
     if (!existingGroupWork) {
@@ -128,10 +124,10 @@ export async function PUT(
 // DELETE /api/group-works/[id] - Delete a specific group work
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
+    const { id } = await context.params;
     const { searchParams } = new URL(request.url);
     const teacherId = searchParams.get("teacherId");
 
@@ -139,12 +135,8 @@ export async function DELETE(
       return NextResponse.json({ error: "Teacher ID is required" }, { status: 400 });
     }
 
-    // Verify the group work belongs to the teacher
     const groupWork = await prisma.groupWork.findFirst({
-      where: {
-        id: id,
-        teacherId: teacherId,
-      },
+      where: { id, teacherId },
     });
 
     if (!groupWork) {

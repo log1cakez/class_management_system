@@ -12,12 +12,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Class ID and teacherId are required' }, { status: 400 })
     }
 
-    // First verify the class belongs to this teacher
     const classExists = await prisma.class.findFirst({
-      where: { 
-        id: classId,
-        teacherId // Ensure teacher owns this class
-      }
+      where: { id: classId, teacherId }
     })
 
     if (!classExists) {
@@ -47,12 +43,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Name, classId, and teacherId are required' }, { status: 400 })
     }
 
-    // First verify the class belongs to this teacher
     const classExists = await prisma.class.findFirst({
-      where: { 
-        id: classId,
-        teacherId // Ensure teacher owns this class
-      }
+      where: { id: classId, teacherId }
     })
 
     if (!classExists) {
@@ -92,18 +84,12 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: 'Teacher ID is required' }, { status: 400 })
     }
 
-    // First verify all students belong to classes owned by this teacher
     const students = await prisma.student.findMany({
-      where: { 
-        id: { in: studentIds }
-      },
-      include: {
-        class: true
-      }
+      where: { id: { in: studentIds } },
+      include: { class: true },
     })
 
-    // Check if all students belong to this teacher's classes
-    const unauthorizedStudents = students.filter(student => student.class.teacherId !== teacherId)
+    const unauthorizedStudents = students.filter(s => s.class.teacherId !== teacherId)
     if (unauthorizedStudents.length > 0) {
       return NextResponse.json({ error: 'Access denied to some students' }, { status: 403 })
     }
@@ -186,6 +172,49 @@ export async function PUT(request: NextRequest) {
       console.error('Error checking student points:', checkError)
     }
     
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+// PATCH /api/students - Update a student (name, points)
+export async function PATCH(request: NextRequest) {
+  try {
+    const body = await request.json()
+    const { id, name, points, teacherId } = body
+
+    if (!id || !teacherId) {
+      return NextResponse.json({ error: 'Student ID and teacherId are required' }, { status: 400 })
+    }
+
+    if (!name?.trim() && points === undefined) {
+      return NextResponse.json({ error: 'Name or points must be provided to update' }, { status: 400 })
+    }
+
+    const student = await prisma.student.findFirst({
+      where: { id },
+      include: { class: true }
+    })
+
+    if (!student) {
+      return NextResponse.json({ error: 'Student not found' }, { status: 404 })
+    }
+
+    if (student.class.teacherId !== teacherId) {
+      return NextResponse.json({ error: 'Access denied' }, { status: 403 })
+    }
+
+    const updateData: { name?: string; points?: number } = {}
+    if (name?.trim()) updateData.name = name.trim()
+    if (typeof points === 'number' && points >= 0) updateData.points = points
+
+    const updatedStudent = await prisma.student.update({
+      where: { id },
+      data: updateData
+    })
+
+    return NextResponse.json(updatedStudent)
+  } catch (error) {
+    console.error('Error updating student:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

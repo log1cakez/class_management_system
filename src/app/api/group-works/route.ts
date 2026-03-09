@@ -12,9 +12,7 @@ export async function GET(request: NextRequest) {
     }
 
     const groupWorks = await prisma.groupWork.findMany({
-      where: {
-        teacherId: teacherId,
-      },
+      where: { teacherId },
       include: {
         class: true,
         groups: {
@@ -84,16 +82,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify the class belongs to the teacher
-    console.log("Checking if class exists:", { classId, teacherId });
     const classExists = await prisma.class.findFirst({
-      where: {
-        id: classId,
-        teacherId: teacherId,
-      },
+      where: { id: classId, teacherId },
     });
 
-    console.log("Class exists:", !!classExists);
     if (!classExists) {
       return NextResponse.json(
         { error: "Class not found or access denied" },
@@ -218,12 +210,8 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Missing group work ID" }, { status: 400 });
     }
 
-    // Verify the group work belongs to the teacher
     const groupWork = await prisma.groupWork.findFirst({
-      where: {
-        id: id,
-        teacherId: teacherId,
-      },
+      where: { id, teacherId },
     });
 
     if (!groupWork) {

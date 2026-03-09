@@ -44,9 +44,9 @@ model Teacher {
     updatedAt DateTime @updatedAt
 
     // Relations
-    classes    Class[]
-    behaviors  Behavior[]
-    groupWorks GroupWork[]
+    classes        Class[]
+    behaviors      Behavior[]
+    groupWorks     GroupWork[]
 
     @@map("teachers")
 }
@@ -60,9 +60,9 @@ model Class {
     updatedAt   DateTime @updatedAt
 
     // Relations
-    teacher    Teacher     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-    students   Student[]
-    groupWorks GroupWork[]
+    teacher     Teacher      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+    students    Student[]
+    groupWorks  GroupWork[]
 
     @@map("classes")
 }

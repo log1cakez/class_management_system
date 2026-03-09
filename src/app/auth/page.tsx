@@ -7,6 +7,10 @@ import { useRouter } from "next/navigation";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotMessage, setForgotMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -22,6 +26,30 @@ export default function AuthPage() {
       ...formData,
       [e.target.name]: e.target.value,
     });
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotLoading(true);
+    setForgotMessage(null);
+    try {
+      const res = await fetch("/api/teachers/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail.trim() }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to send email");
+      setForgotMessage({ type: "success", text: data.message });
+      setForgotEmail("");
+    } catch (err) {
+      setForgotMessage({
+        type: "error",
+        text: err instanceof Error ? err.message : "Something went wrong",
+      });
+    } finally {
+      setForgotLoading(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,12 +179,27 @@ export default function AuthPage() {
             </div>
 
             <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-1"
-              >
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1">
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  Password
+                </label>
+                {isLogin && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowForgotPassword(true);
+                      setForgotMessage(null);
+                      setForgotEmail(formData.email);
+                    }}
+                    className="text-sm text-yellow-600 hover:text-yellow-700 font-medium"
+                  >
+                    Forgot password?
+                  </button>
+                )}
+              </div>
               <input
                 type="password"
                 id="password"
@@ -198,6 +241,58 @@ export default function AuthPage() {
               {loading ? "Processing..." : isLogin ? "Login" : "Register"}
             </button>
           </form>
+
+          {/* Forgot Password Modal */}
+          {showForgotPassword && (
+            <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/50 p-4">
+              <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border-4 border-yellow-400">
+                <h2 className="text-xl font-bold text-yellow-700 mb-2">Forgot Password</h2>
+                <p className="text-gray-600 text-sm mb-4">
+                  Enter your registered email and we&apos;ll send you your password.
+                </p>
+                {forgotMessage && (
+                  <div
+                    className={`mb-4 p-3 rounded-lg text-sm ${
+                      forgotMessage.type === "success"
+                        ? "bg-green-100 border border-green-400 text-green-700"
+                        : "bg-red-100 border border-red-400 text-red-700"
+                    }`}
+                  >
+                    {forgotMessage.text}
+                  </div>
+                )}
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    required
+                    className="w-full px-4 py-3 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
+                    placeholder="Enter your email"
+                  />
+                  <div className="flex gap-3">
+                    <button
+                      type="submit"
+                      disabled={forgotLoading}
+                      className="flex-1 px-4 py-3 bg-yellow-500 hover:bg-yellow-600 text-white font-bold rounded-lg disabled:opacity-50"
+                    >
+                      {forgotLoading ? "Sending..." : "Send Password"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowForgotPassword(false);
+                        setForgotMessage(null);
+                      }}
+                      className="px-4 py-3 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold rounded-lg"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
 
           {/* Toggle between login and register */}
           <div className="text-center mt-6">

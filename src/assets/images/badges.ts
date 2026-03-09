@@ -87,7 +87,7 @@ export const REWARD_BADGES: RewardBadge[] = [
   },
   {
     id: 'responsible-student',
-    name: 'Responsible Student',
+    name: 'Responsible Learner',
     description: 'Takes responsibility for learning',
     imagePath: '/images/Reward Badges/Picture34.png',
     behaviorTypes: ['INDIVIDUAL']
