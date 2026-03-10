@@ -27,6 +27,7 @@ function IndividualTaskContent() {
     addingPoints,
   } = useStudents(classId, teacherId);
 
+  const [studentSearchQuery, setStudentSearchQuery] = useState("");
   const [isBehaviorModalOpen, setIsBehaviorModalOpen] = useState(false);
   const [isComplimentModalOpen, setIsComplimentModalOpen] = useState(false);
   const [complimentData, setComplimentData] = useState<{
@@ -133,7 +134,7 @@ function IndividualTaskContent() {
             backButtonSize={80}
             worksButtonSize={80}
             gap="gap-2"
-            onWorksClick={() => {}}
+            showWorksButton={false}
             homeUrl={
               teacherId
                 ? `/teacher-dashboard?teacherId=${teacherId}`
@@ -176,8 +177,29 @@ function IndividualTaskContent() {
         {!loading && !error && classId && (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2">
+            {/* Search Bar */}
+            <div className="mb-6 flex justify-start">
+              <div className="relative max-w-md w-full">
+                <input
+                  type="text"
+                  placeholder="Search students by name..."
+                  value={studentSearchQuery}
+                  onChange={(e) => setStudentSearchQuery(e.target.value)}
+                  className="w-full px-4 py-3 pl-10 bg-white/80 border-2 border-gray-300 rounded-lg text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-lg"
+                />
+                <svg
+                  className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+            </div>
+
             {/* Control Buttons */}
-            <div className="flex justify-center gap-4 mb-6">
+            <div className="flex justify-start gap-4 mb-6">
               {/* Select All Button */}
               <button
                 onClick={toggleSelectAll}
@@ -212,9 +234,14 @@ function IndividualTaskContent() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 pr-50 pl-50">
-            {students.map((student) => (
-              <div key={student.id} className="bg-[rgba(255,255,255,0.5)] rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 relative">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+            {(studentSearchQuery.trim()
+              ? students.filter((s) =>
+                  s.name.toLowerCase().includes(studentSearchQuery.trim().toLowerCase())
+                )
+              : students
+            ).map((student) => (
+              <div key={student.id} className="bg-[rgba(255,255,255,0.5)] rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 relative [&_.student-avatar]:ml-0 [&_.student-avatar]:mr-auto [&_.student-name]:text-left">
                 {/* Student Card */}
                 <div className="student-card">
                   {/* Character with points badge */}
@@ -254,7 +281,7 @@ function IndividualTaskContent() {
                 </div>
 
                 {/* Checkbox */}
-                <div className="flex justify-center">
+                <div className="flex justify-start">
                   <label className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -283,7 +310,7 @@ function IndividualTaskContent() {
           <button
             onClick={handleNextClick}
             disabled={addingPoints}
-            className="bg-amber-800 hover:bg-amber-900 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-4 px-8 rounded-lg shadow-lg border-2 border-amber-900 transition-all duration-200 hover:scale-105 flex items-center gap-3"
+            className="flex flex-col items-center gap-1 bg-amber-800 hover:bg-amber-900 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-bold py-4 px-8 rounded-lg shadow-lg border-2 border-amber-900 transition-all duration-200 hover:scale-105"
           >
             {addingPoints ? (
               <>
@@ -292,14 +319,14 @@ function IndividualTaskContent() {
               </>
             ) : (
               <>
-                <span className="text-xl">NEXT</span>
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
                   <path
                     fillRule="evenodd"
                     d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
                     clipRule="evenodd"
                   />
                 </svg>
+                <span className="text-xl">NEXT</span>
               </>
             )}
           </button>

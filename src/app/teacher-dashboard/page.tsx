@@ -217,18 +217,13 @@ function TeacherDashboardContent() {
         {/* Add Class Section */}
         <div className="mb-8 pl-50">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 bg-orange-400 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
-              <svg
-                className="w-6 h-6 text-white"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-12 h-12 bg-orange-400 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <span className="text-xs font-bold text-yellow-400 drop-shadow">Add</span>
             </div>
             <span className="text-2xl font-bold text-yellow-400 drop-shadow-lg">
               Add Class
@@ -295,25 +290,28 @@ function TeacherDashboardContent() {
                       e.stopPropagation();
                       openEditClass(classItem);
                     }}
-                    className="px-3 py-2 bg-blue-400 hover:bg-blue-500 text-white text-sm rounded-full transition-all duration-200 hover:scale-105 shadow-lg border-2 border-blue-500"
+                    className="flex flex-col items-center gap-0.5 px-2 py-1.5 bg-blue-400 hover:bg-blue-500 text-white text-xs rounded-lg transition-all duration-200 hover:scale-105 shadow-lg border-2 border-blue-500"
                     title="Edit class"
                   >
-                    ✎
+                    <span className="text-base">✎</span>
+                    <span className="text-[10px] font-semibold">Edit</span>
                   </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDeleteClass(classItem.id);
                     }}
-                    className="px-3 py-2 bg-red-400 hover:bg-red-500 text-white text-sm rounded-full transition-all duration-200 hover:scale-105 shadow-lg border-2 border-red-500"
+                    className="flex flex-col items-center gap-0.5 px-2 py-1.5 bg-red-400 hover:bg-red-500 text-white text-xs rounded-lg transition-all duration-200 hover:scale-105 shadow-lg border-2 border-red-500"
                   >
-                    ×
+                    <span className="text-base">×</span>
+                    <span className="text-[10px] font-semibold">Remove</span>
                   </button>
                 </div>
 
                 {/* Class Icon */}
-                <div className="mx-auto mb-4 flex items-center justify-center">
-               <Image src={"/icons/blackboard.svg"} alt="Class Icon" width={100} height={100} />
+                <div className="mx-auto mb-4 flex flex-col items-center justify-center gap-1">
+                  <Image src={"/icons/class-icon.png"} alt="Class Icon" width={100} height={100} />
+                  <span className="text-xs font-semibold text-yellow-600">Class</span>
                 </div>
 
                
@@ -350,9 +348,8 @@ function TeacherDashboardContent() {
       <div className="fixed bottom-8 right-8 z-20" ref={menuRef}>
         <button
           onClick={() => setMenuOpen((o) => !o)}
-          className="flex items-center gap-2 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-yellow-900 font-bold rounded-xl transition-all duration-200 shadow-lg border-2 border-yellow-600"
+          className="flex flex-col items-center gap-1 px-6 py-3 bg-yellow-500 hover:bg-yellow-600 text-yellow-900 font-bold rounded-xl transition-all duration-200 shadow-lg border-2 border-yellow-600"
         >
-          Account
           <svg
             className={`w-5 h-5 transition-transform ${menuOpen ? "rotate-180" : ""}`}
             fill="none"
@@ -361,6 +358,7 @@ function TeacherDashboardContent() {
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
           </svg>
+          <span className="text-sm">Account</span>
         </button>
         {menuOpen && (
           <div className="absolute bottom-full right-0 mb-2 w-56 bg-white rounded-xl shadow-xl border-2 border-yellow-300 overflow-hidden">

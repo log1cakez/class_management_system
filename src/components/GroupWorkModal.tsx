@@ -61,6 +61,7 @@ export default function GroupWorkModal({
   const [activityName, setActivityName] = useState("");
   const [showAddGroup, setShowAddGroup] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
+  const [studentSearchQuery, setStudentSearchQuery] = useState("");
   const [behaviorPraises, setBehaviorPraises] = useState<Record<string, string>>({});
   const [isInSession, setIsInSession] = useState(false);
 
@@ -88,6 +89,7 @@ export default function GroupWorkModal({
     setStudents(students.map(student => ({ ...student, isSelected: false })));
     setShowAddGroup(false);
     setNewGroupName("");
+    setStudentSearchQuery("");
     if (clearPraises) {
       setBehaviorPraises({});
     }
@@ -464,6 +466,27 @@ export default function GroupWorkModal({
                       );
                     })()}
                     
+                    {/* Search Bar */}
+                    <div className="mb-3">
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="Search students by name..."
+                          value={studentSearchQuery}
+                          onChange={(e) => setStudentSearchQuery(e.target.value)}
+                          className="w-full px-3 py-2 pl-9 text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
+                        />
+                        <svg
+                          className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                      </div>
+                    </div>
+
                     {/* Control Buttons */}
                     <div className="flex gap-2 mb-3">
                       <button
@@ -494,7 +517,12 @@ export default function GroupWorkModal({
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto border border-gray-300 rounded-lg p-3 bg-white">
-                        {students.map((student) => {
+                        {(studentSearchQuery.trim()
+                          ? students.filter((s) =>
+                              s.name.toLowerCase().includes(studentSearchQuery.trim().toLowerCase())
+                            )
+                          : students
+                        ).map((student) => {
                           const isAlreadyInGroup = groups.some(group => 
                             group.students.some(s => s.id === student.id)
                           );

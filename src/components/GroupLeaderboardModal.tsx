@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 interface GroupLeaderboardModalProps {
   isOpen: boolean;
@@ -17,23 +17,29 @@ interface GroupLeaderboardModalProps {
   groupPoints: Record<string, number>;
 }
 
+type SortOrder = "desc" | "asc";
+
 export default function GroupLeaderboardModal({
   isOpen,
   onClose,
   groupWork,
   groupPoints,
 }: GroupLeaderboardModalProps) {
-  if (!isOpen) return null;
+  const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
 
-  // Sort groups by points (descending)
-  const sortedGroups = [...groupWork.groups]
-    .map((group) => ({
-      id: group.id,
-      name: group.name,
-      points: groupPoints[group.id] || 0,
-      studentCount: group.students.length,
-    }))
-    .sort((a, b) => b.points - a.points);
+  const sortedGroups = useMemo(() => {
+    if (!groupWork?.groups) return [];
+    return [...groupWork.groups]
+      .map((group) => ({
+        id: group.id,
+        name: group.name,
+        points: groupPoints?.[group.id] || 0,
+        studentCount: group.students?.length ?? 0,
+      }))
+      .sort((a, b) => (sortOrder === "desc" ? b.points - a.points : a.points - b.points));
+  }, [groupWork, groupPoints, sortOrder]);
+
+  if (!isOpen || !groupWork) return null;
 
   return (
     <div className="fixed inset-0 backdrop-blur-sm bg-opacity-95 flex items-center justify-center z-50 p-4">
@@ -45,14 +51,24 @@ export default function GroupLeaderboardModal({
               <h2 className="text-2xl font-bold">GROUP LEADERBOARD</h2>
               <p className="text-indigo-100 mt-1">{groupWork.name}</p>
             </div>
-            <button
-              onClick={onClose}
-              className="text-white hover:text-gray-200 transition-colors duration-200"
-            >
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setSortOrder(o => (o === "desc" ? "asc" : "desc"))}
+                className="px-3 py-1.5 rounded-lg bg-white/20 hover:bg-white/30 text-sm font-semibold transition-all flex items-center gap-1"
+                title={sortOrder === "desc" ? "Highest to lowest (click for lowest to highest)" : "Lowest to highest (click for highest to lowest)"}
+              >
+                {sortOrder === "desc" ? "↓ High→Low" : "↑ Low→High"}
+              </button>
+              <button
+                onClick={onClose}
+                className="flex flex-col items-center gap-0.5 text-white hover:text-gray-200 transition-colors duration-200"
+              >
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span className="text-xs font-semibold">Close</span>
+              </button>
+            </div>
           </div>
         </div>
 

@@ -30,8 +30,8 @@ export default function BadgeCelebrationModal({
       setShowConfetti(true);
       setShowSparkles(true);
       
-      // Hide confetti after 3 seconds
-      setTimeout(() => setShowConfetti(false), 3000);
+      // Hide confetti after 4 seconds
+      setTimeout(() => setShowConfetti(false), 4000);
     }
   }, [isOpen, badges]);
 
@@ -66,7 +66,7 @@ export default function BadgeCelebrationModal({
       {/* Magical sparkles background */}
       {showSparkles && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(20)].map((_, i) => (
+          {[...Array(40)].map((_, i) => (
             <div
               key={i}
               className="absolute animate-ping"
@@ -86,7 +86,7 @@ export default function BadgeCelebrationModal({
       {/* Confetti animation */}
       {showConfetti && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {[...Array(50)].map((_, i) => (
+          {[...Array(150)].map((_, i) => (
             <div
               key={i}
               className="absolute animate-bounce"
@@ -99,7 +99,7 @@ export default function BadgeCelebrationModal({
             >
               <div 
                 className={`w-3 h-3 rounded-full ${
-                  ['bg-red-400', 'bg-blue-400', 'bg-green-400', 'bg-yellow-400', 'bg-purple-400', 'bg-pink-400'][Math.floor(Math.random() * 6)]
+                  ['bg-red-400', 'bg-blue-400', 'bg-green-400', 'bg-yellow-400', 'bg-purple-400', 'bg-pink-400', 'bg-amber-400', 'bg-cyan-400'][Math.floor(Math.random() * 8)]
                 } opacity-80`}
               ></div>
             </div>

@@ -81,7 +81,7 @@ function GroupWorkDashboardContent() {
             backButtonSize={80}
             worksButtonSize={80}
             gap="gap-2"
-            onWorksClick={() => {}}
+            showWorksButton={false}
             homeUrl={
               teacherId
                 ? `/teacher-dashboard?teacherId=${teacherId}`
@@ -103,13 +103,13 @@ function GroupWorkDashboardContent() {
           <div className="flex justify-center mb-6">
             <button
               onClick={() => setShowManageBehaviors(true)}
-              className="hover:bg-orange-700 text-white font-semibold py-2 px-6 rounded-lg shadow-lg border-2 border-orange-700 transition-all duration-200 hover:scale-105 flex items-center gap-2"
+              className="flex flex-col items-center gap-1 hover:bg-orange-700 text-white font-semibold py-2 px-6 rounded-lg shadow-lg border-2 border-orange-700 transition-all duration-200 hover:scale-105"
               style={{ backgroundColor: "#EE7900", borderColor: "#EE7900" }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 100 4m0-4v2m0-6V4" />
               </svg>
-              Manage Behaviors
+              <span className="text-sm">Manage Behaviors</span>
             </button>
           </div>
 

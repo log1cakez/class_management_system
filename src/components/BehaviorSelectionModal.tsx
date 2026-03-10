@@ -263,26 +263,30 @@ export default function BehaviorSelectionModal({
 
                         {/* Edit/Delete Buttons */}
                         {teacherId && (
-                          <div className="flex gap-1">
+                          <div className="flex gap-2">
                             <button
                               onClick={() =>
                                 startEdit(behavior.id, behavior.name)
                               }
-                              className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm font-semibold transition-all duration-200 hover:scale-105"
+                              className="flex flex-col items-center gap-0.5 bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm font-semibold transition-all duration-200 hover:scale-105"
                               title="Edit behavior"
                             >
-                              ✏️
+                              <span>✏️</span>
+                              <span className="text-[10px]">Edit</span>
                             </button>
                             <button
                               onClick={() => handleDeleteBehavior(behavior.id)}
                               disabled={deletingBehavior}
-                              className="bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-2 py-1 rounded text-sm font-semibold transition-all duration-200 hover:scale-105 flex items-center gap-1"
+                              className="flex flex-col items-center gap-0.5 bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-2 py-1 rounded text-sm font-semibold transition-all duration-200 hover:scale-105"
                               title="Delete behavior"
                             >
                               {deletingBehavior ? (
                                 <LoadingSpinner size="sm" />
                               ) : (
-                                "🗑️"
+                                <>
+                                  <span>🗑️</span>
+                                  <span className="text-[10px]">Delete</span>
+                                </>
                               )}
                             </button>
                           </div>
@@ -324,7 +328,7 @@ export default function BehaviorSelectionModal({
                 onClick={handleConfirm}
                 className="bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg border-3 border-green-600 transition-all duration-200 hover:scale-105 text-lg"
               >
-                Confirm ({selectedCount} points)
+                Confirm ({selectedCount} point{selectedCount !== 1 ? "s" : ""})
               </button>
             </div>
           </div>

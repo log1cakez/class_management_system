@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import Image from "next/image";
 import { DUCK_ICONS, IMAGES } from "@/assets/images/config";
 import NavigationButtons from "@/components/NavigationButtons";
@@ -27,8 +27,19 @@ function DashboardContent() {
   const [editingStudent, setEditingStudent] = useState<{ id: string; name: string } | null>(null);
   const [editStudentName, setEditStudentName] = useState("");
   const [editStudentLoading, setEditStudentLoading] = useState(false);
+  const [showRewardsConfetti, setShowRewardsConfetti] = useState(false);
 
   const { createGroupWork, creatingGroupWork } = useGroupWorks(teacherId);
+
+  useEffect(() => {
+    if (showRewardsModal) {
+      setShowRewardsConfetti(true);
+      const t = setTimeout(() => setShowRewardsConfetti(false), 4000);
+      return () => clearTimeout(t);
+    } else {
+      setShowRewardsConfetti(false);
+    }
+  }, [showRewardsModal]);
 
   const addStudent = async () => {
     if (newStudentName.trim()) {
@@ -154,18 +165,13 @@ function DashboardContent() {
         {/* Add Student Section - Top Left */}
         <div className="mb-8 pl-50">
           <div className="flex items-center gap-4 mb-4">
-            <div className="w-12 h-12 bg-orange-400 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
-              <svg
-                className="w-6 h-6 text-white"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-              >
-                <path
-                  fillRule="evenodd"
-                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                  clipRule="evenodd"
-                />
-              </svg>
+            <div className="flex flex-col items-center gap-1">
+              <div className="w-12 h-12 bg-orange-400 rounded-full flex items-center justify-center border-2 border-white shadow-lg">
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <span className="text-xs font-bold text-yellow-400 drop-shadow">Add</span>
             </div>
             <span className="text-2xl font-bold text-yellow-400 drop-shadow-lg">
               Add Learner
@@ -245,19 +251,21 @@ function DashboardContent() {
                       e.stopPropagation();
                       openEditStudent(student);
                     }}
-                    className="px-3 py-2 bg-blue-400 hover:bg-blue-500 text-white text-sm rounded-full transition-all duration-200 hover:scale-105 shadow-lg border-2 border-blue-500"
+                    className="flex flex-col items-center gap-0.5 px-2 py-1.5 bg-blue-400 hover:bg-blue-500 text-white text-xs rounded-lg transition-all duration-200 hover:scale-105 shadow-lg border-2 border-blue-500"
                     title="Edit student"
                   >
-                    ✎
+                    <span className="text-base">✎</span>
+                    <span className="text-[10px] font-semibold">Edit</span>
                   </button>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
                       handleDeleteStudent(student.id);
                     }}
-                    className="px-3 py-2 bg-red-400 hover:bg-red-500 text-white text-sm rounded-full transition-all duration-200 hover:scale-105 shadow-lg border-2 border-red-500"
+                    className="flex flex-col items-center gap-0.5 px-2 py-1.5 bg-red-400 hover:bg-red-500 text-white text-xs rounded-lg transition-all duration-200 hover:scale-105 shadow-lg border-2 border-red-500"
                   >
-                    ×
+                    <span className="text-base">×</span>
+                    <span className="text-[10px] font-semibold">Remove</span>
                   </button>
                 </div>
 
@@ -301,12 +309,12 @@ function DashboardContent() {
       <div className="fixed bottom-8 left-8 z-20">
         <button
           onClick={() => setShowRewardsModal(true)}
-          className="bg-yellow-400 hover:bg-yellow-500 text-yellow-800 font-bold py-4 px-6 rounded-full shadow-lg border-2 border-yellow-600 transition-all duration-200 hover:scale-105 flex items-center gap-3"
+          className="flex flex-col items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-yellow-800 font-bold py-4 px-6 rounded-full shadow-lg border-2 border-yellow-600 transition-all duration-200 hover:scale-105"
         >
           <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
             <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
           </svg>
-          Rewards
+          <span className="text-sm">Rewards</span>
         </button>
       </div>
 
@@ -422,7 +430,29 @@ function DashboardContent() {
       {/* Rewards Modal */}
       {showRewardsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50">
-          <div className="bg-yellow-100 rounded-3xl p-8 shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          {showRewardsConfetti && (
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-[51]">
+              {[...Array(120)].map((_, i) => (
+                <div
+                  key={i}
+                  className="absolute animate-bounce"
+                  style={{
+                    left: `${Math.random() * 100}%`,
+                    top: `${Math.random() * 100}%`,
+                    animationDelay: `${Math.random() * 2}s`,
+                    animationDuration: `${2 + Math.random() * 2}s`
+                  }}
+                >
+                  <div
+                    className={`w-3 h-3 rounded-full ${
+                      ["bg-red-400", "bg-blue-400", "bg-green-400", "bg-yellow-400", "bg-purple-400", "bg-pink-400", "bg-amber-400"][Math.floor(Math.random() * 7)]
+                    } opacity-80`}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          <div className="bg-yellow-100 rounded-3xl p-8 shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto relative z-10">
             {/* Modal Header */}
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-gray-800 mb-2 drop-shadow-sm">

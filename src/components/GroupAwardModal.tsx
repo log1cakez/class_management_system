@@ -269,7 +269,7 @@ export default function GroupAwardModal({
                         <span className="font-bold text-yellow-800">{award.groupName}</span>
                         <span className="mx-2 text-yellow-700">→</span>
                         <span className="font-bold text-yellow-800">{award.behaviorName}</span>
-                        <span className="mx-2 text-yellow-700">({award.points} points)</span>
+                        <span className="mx-2 text-yellow-700">({award.points} point{award.points === 1 ? "" : "s"})</span>
                         <span className="text-sm text-yellow-600">- Predefined praise will be used</span>
                       </div>
                       <button
