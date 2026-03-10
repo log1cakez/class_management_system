@@ -2,7 +2,9 @@
 
 import { useState, Suspense, useRef, useEffect } from "react";
 import Image from "next/image";
-import { ICONS, IMAGES } from "@/assets/images/config";
+import { ICONS } from "@/assets/images/config";
+import BackgroundLayer from "@/components/BackgroundLayer";
+import BackgroundChangeModal from "@/components/BackgroundChangeModal";
 import { useClasses } from "@/hooks/useClasses";
 import { useSearchParams } from "next/navigation";
 
@@ -28,6 +30,7 @@ function TeacherDashboardContent() {
   const [editingClass, setEditingClass] = useState<{ id: string; name: string } | null>(null);
   const [editClassName, setEditClassName] = useState("");
   const [editClassLoading, setEditClassLoading] = useState(false);
+  const [showBackgroundModal, setShowBackgroundModal] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -191,17 +194,8 @@ function TeacherDashboardContent() {
 
   return (
     <main className="min-h-screen relative overflow-hidden">
-      {/* Background Video */}
-      <div className="absolute inset-0 z-0">
-        <video
-          src={IMAGES.HOMEPAGE_BG}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
-      </div>
+      {/* Background */}
+      <BackgroundLayer />
 
       {/* Main Content */}
       <div className="relative z-10 pt-20 pb-20">
@@ -309,9 +303,8 @@ function TeacherDashboardContent() {
                 </div>
 
                 {/* Class Icon */}
-                <div className="mx-auto mb-4 flex flex-col items-center justify-center gap-1">
-                  <Image src={"/icons/class-icon.png"} alt="Class Icon" width={100} height={100} />
-                  <span className="text-xs font-semibold text-yellow-600">Class</span>
+                <div className="mx-auto mb-4 flex items-center justify-center">
+                  <Image src={"/icons/class-icon.png"} alt="Class Icon" width={160} height={160} />
                 </div>
 
                
@@ -365,6 +358,15 @@ function TeacherDashboardContent() {
             <button
               onClick={() => {
                 setMenuOpen(false);
+                setShowBackgroundModal(true);
+              }}
+              className="w-full px-4 py-3 text-left hover:bg-yellow-50 font-medium text-gray-800 border-b border-gray-100"
+            >
+              Change Background
+            </button>
+            <button
+              onClick={() => {
+                setMenuOpen(false);
                 openUpdateCredentials();
               }}
               disabled={!teacherId}
@@ -394,6 +396,12 @@ function TeacherDashboardContent() {
           </div>
         )}
       </div>
+
+      {/* Background Change Modal */}
+      <BackgroundChangeModal
+        isOpen={showBackgroundModal}
+        onClose={() => setShowBackgroundModal(false)}
+      />
 
       {/* Edit Class Modal */}
       {editingClass && (

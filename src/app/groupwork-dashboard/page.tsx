@@ -3,7 +3,7 @@
 import { Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { IMAGES } from "@/assets/images/config";
+import BackgroundLayer from "@/components/BackgroundLayer";
 import NavigationButtons from "@/components/NavigationButtons";
 import GroupWorkDemo from "@/components/GroupWorkDemo";
 import GroupLeaderboard from "@/components/GroupLeaderboard";
@@ -45,16 +45,9 @@ function GroupWorkDashboardContent() {
 
   return (
     <main className="min-h-screen relative overflow-hidden">
-      {/* Background Video */}
+      {/* Background */}
       <div className="absolute inset-0 z-0">
-        <video
-          src={IMAGES.HOMEPAGE_BG}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
+        <BackgroundLayer />
       </div>
 
       {/* Content Overlay */}

@@ -2,7 +2,8 @@
 
 import { useState, Suspense } from "react";
 import Image from "next/image";
-import { DUCK_ICONS, IMAGES } from "@/assets/images/config";
+import { DUCK_ICONS } from "@/assets/images/config";
+import BackgroundLayer from "@/components/BackgroundLayer";
 import NavigationButtons from "@/components/NavigationButtons";
 import BehaviorSelectionModal from "@/components/BehaviorSelectionModal";
 import ComplimentModal from "@/components/ComplimentModal";
@@ -103,16 +104,9 @@ function IndividualTaskContent() {
 
   return (
     <main className="min-h-screen relative overflow-hidden">
-      {/* Background Video */}
+      {/* Background */}
       <div className="absolute inset-0 z-0">
-        <video
-          src={IMAGES.HOMEPAGE_BG}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
+        <BackgroundLayer />
       </div>
 
       {/* Content Overlay */}
@@ -122,7 +116,7 @@ function IndividualTaskContent() {
           {/* Individual Task Title */}
           <div className="flex-1">
             <div className="rounded-2xl px-8 py-4 shadow-lg mx-auto max-w-md">
-              <h1 className="text-4xl font-bold text-center drop-shadow-sm" style={{ color: "#FFDF73" }}>
+              <h1 className="text-4xl font-bold text-center drop-shadow-sm" style={{ color: "#FFDE42" }}>
                 INDIVIDUAL TASK
               </h1>
             </div>

@@ -2,8 +2,9 @@
 
 import { useState, Suspense, useEffect } from "react";
 import Image from "next/image";
-import { DUCK_ICONS, IMAGES } from "@/assets/images/config";
+import { DUCK_ICONS } from "@/assets/images/config";
 import NavigationButtons from "@/components/NavigationButtons";
+import BackgroundLayer from "@/components/BackgroundLayer";
 import { useStudents } from "@/hooks/useStudents";
 import { useSearchParams, useRouter } from "next/navigation";
 import GroupWorkModal from "@/components/GroupWorkModal";
@@ -113,18 +114,11 @@ function DashboardContent() {
 
   return (
     <main className="min-h-screen relative overflow-hidden">
-      {/* Background Video */}
+      {/* Background */}
       <div
         className={`absolute inset-0 z-0 transition-all duration-300 ${showTaskModal || showRewardsModal || showGroupWorkModal || editingStudent ? "blur-sm" : ""}`}
       >
-        <video
-          src={IMAGES.HOMEPAGE_BG}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover object-center"
-        />
+        <BackgroundLayer />
       </div>
 
       {/* Content Overlay */}
