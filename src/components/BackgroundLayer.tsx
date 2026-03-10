@@ -15,11 +15,15 @@ export default function BackgroundLayer() {
           muted
           playsInline
           className="absolute inset-0 w-full h-full object-cover object-center"
+          style={{ objectFit: "cover" }}
         />
       ) : (
         <div
           className="absolute inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: `url(${backgroundUrl})` }}
+          style={{
+            backgroundImage: `url(${backgroundUrl})`,
+            backgroundSize: "cover",
+          }}
         />
       )}
     </div>
