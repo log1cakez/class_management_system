@@ -38,6 +38,9 @@ export const DUCK_ICONS = {
   DUCK_4: '/icons/World_Wildlife_Day_14.png',
   DUCK_5: '/icons/World_Wildlife_Day_13.png',
   DUCK_6: '/icons/World_Wildlife_Day_12.png',
+  DUCK_7: '/icons/World_Wildlife_Day_18.png',
+  DUCK_8: '/icons/World_Wildlife_Day_19.png',
+  DUCK_9: '/icons/World_Wildlife_Day_20.png',
 } as const
 
 export const REWARD_ICONS = {
@@ -46,4 +49,7 @@ export const REWARD_ICONS = {
   REWARD_3: '/icons/World_Wildlife_Day_9.png',
   REWARD_4: '/icons/World_Wildlife_Day_10.png',
   REWARD_5: '/icons/World_Wildlife_Day_11.png',
+  REWARD_6: '/icons/World_Wildlife_Day_4.png',
+  REWARD_7: '/icons/World_Wildlife_Day_5.png',
+  REWARD_8: '/icons/World_Wildlife_Day_6.png',
 } as const

@@ -274,8 +274,11 @@ export default function GroupWorkDemo({
     return <div>Please log in to access group work features.</div>;
   }
 
+  // Only show group works owned by the current user; others cannot see them at all
+  const myGroupWorks = groupWorks.filter((gw) => gw.teacherId === teacherId);
+
   // Sort group works by createdAt (most recent first)
-  const sortedGroupWorks = [...groupWorks].sort((a, b) => {
+  const sortedGroupWorks = [...myGroupWorks].sort((a, b) => {
     const dateA = new Date(a.createdAt).getTime();
     const dateB = new Date(b.createdAt).getTime();
     return dateB - dateA; // Most recent first
@@ -314,7 +317,7 @@ export default function GroupWorkDemo({
           </button>
 
           {/* Dropdown for older activities */}
-          {!loading && groupWorks.length > 0 && olderActivities.length > 0 && (
+          {!loading && myGroupWorks.length > 0 && olderActivities.length > 0 && (
             <div className="relative ml-auto" ref={dropdownRef}>
               <button
                 onClick={() => setShowOlderActivities(!showOlderActivities)}
@@ -382,7 +385,7 @@ export default function GroupWorkDemo({
         <div className="text-center py-8">
           <LoadingSpinner size="lg" text="Loading group works..." />
         </div>
-      ) : groupWorks.length === 0 ? (
+      ) : myGroupWorks.length === 0 ? (
         <div className="text-center py-8">
           <div className="text-lg text-gray-600 mb-4">
             No group works created yet.
@@ -419,35 +422,32 @@ export default function GroupWorkDemo({
                     </h3>
 
                     <div className="mb-4 flex flex-row gap-4">
-                      {/* Groups Box */}
-                      <div className="flex-1 bg-[#FFF6D6] border-2 border-[#F7D77A] rounded-xl p-4 shadow" style={{ minWidth: 0 }}>
-                        <p className="text-base font-bold text-[#D1A100] mb-2">
-                          Groups <span className="font-normal text-gray-700">({groupWork.groups.length})</span>:
-                        </p>
-                        <div className="space-y-2">
-                          {groupWork.groups.map((group, idx) => {
-                            const points = groupPoints[groupWork.id]?.[group.id] || 0;
-                            // Optional: Add emoji icons for group (demo only, you can map by idx or group name)
-                            const groupIcons = [
-                              '🐶', // paw patrol
-                              '🐱', // meow patrol
-                              '🐥', // quack patrol
-                            ];
-                            return (
-                              <div
-                                key={group.id}
-                                className="flex items-center justify-between text-base font-medium text-[#3B2E07]"
-                              >
-                                <span className="flex items-center gap-2">
-                                  <span className="font-bold text-[#2B7A2B]">{group.name}</span>
-                                  <span className="text-gray-500 font-normal">({group.students.length} students)</span>
-                                </span>
-                                <span className={`font-bold ${points > 0 ? 'text-[#2B7A2B]' : 'text-gray-500'}`}>{points} pt{points === 1 ? '' : 's'}</span>
-                              </div>
-                            );
-                          })}
+                      {/* Groups Box - only show to the owner (creator) of this group work */}
+                      {groupWork.teacherId === teacherId && (
+                        <div className="flex-1 bg-[#FFF6D6] border-2 border-[#F7D77A] rounded-xl p-4 shadow" style={{ minWidth: 0 }}>
+                          <p className="text-base font-bold text-[#D1A100] mb-2">
+                            Groups <span className="font-normal text-gray-700">({groupWork.groups.length})</span>:
+                          </p>
+                          <div className="space-y-2">
+                            {groupWork.groups.map((group, idx) => {
+                              const points = groupPoints[groupWork.id]?.[group.id] || 0;
+                              const groupIcons = ['🐶', '🐱', '🐥'];
+                              return (
+                                <div
+                                  key={group.id}
+                                  className="flex items-center justify-between text-base font-medium text-[#3B2E07]"
+                                >
+                                  <span className="flex items-center gap-2">
+                                    <span className="font-bold text-[#2B7A2B]">{group.name}</span>
+                                    <span className="text-gray-500 font-normal">({group.students.length} students)</span>
+                                  </span>
+                                  <span className={`font-bold ${points > 0 ? 'text-[#2B7A2B]' : 'text-gray-500'}`}>{points} pt{points === 1 ? '' : 's'}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
-                      </div>
+                      )}
                       {/* Behaviors Box */}
                       <div className="flex-1 bg-[#DDF3D6] border-2 border-[#7ED957] rounded-xl p-4 shadow" style={{ minWidth: 0 }}>
                         <p className="text-base font-bold text-[#2B7A2B] mb-2">
@@ -482,51 +482,57 @@ export default function GroupWorkDemo({
                           </svg>
                           <span>Show Leaderboard</span>
                         </button>
-                        <div className="flex-1"></div>
-                        <button
-                          onClick={() => openEditModal(groupWork)}
-                          disabled={updatingGroupWork}
-                          className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm"
-                        >
-                          {updatingGroupWork ? (
-                            <>
-                              <LoadingSpinner size="sm" />
-                              Updating...
-                            </>
-                          ) : (
-                            "Edit"
-                          )}
-                        </button>
-                        <button
-                          onClick={() => handleDeleteGroupWork(groupWork.id)}
-                          disabled={deletingGroupWork}
-                          className="bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm"
-                        >
-                          {deletingGroupWork ? (
-                            <>
-                              <LoadingSpinner size="sm" />
-                              Deleting...
-                            </>
-                          ) : (
-                            "Delete"
-                          )}
-                        </button>
-                      </div>
-                      <button
-                        onClick={() => openAwardModal(groupWork)}
-                        disabled={awardingPoints || loadingGroupPoints}
-                        className="bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm mx-auto"
-                        style={{ width: '500px' }}
-                      >
-                        {awardingPoints ? (
+                        {groupWork.teacherId === teacherId && (
                           <>
-                            <LoadingSpinner size="sm" />
-                            Awarding...
+                            <div className="flex-1"></div>
+                            <button
+                              onClick={() => openEditModal(groupWork)}
+                              disabled={updatingGroupWork}
+                              className="bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm"
+                            >
+                              {updatingGroupWork ? (
+                                <>
+                                  <LoadingSpinner size="sm" />
+                                  Updating...
+                                </>
+                              ) : (
+                                "Edit"
+                              )}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteGroupWork(groupWork.id)}
+                              disabled={deletingGroupWork}
+                              className="bg-red-500 hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm"
+                            >
+                              {deletingGroupWork ? (
+                                <>
+                                  <LoadingSpinner size="sm" />
+                                  Deleting...
+                                </>
+                              ) : (
+                                "Delete"
+                              )}
+                            </button>
                           </>
-                        ) : (
-                          "Award Points"
                         )}
-                      </button>
+                      </div>
+                      {groupWork.teacherId === teacherId && (
+                        <button
+                          onClick={() => openAwardModal(groupWork)}
+                          disabled={awardingPoints || loadingGroupPoints}
+                          className="bg-yellow-500 hover:bg-yellow-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg font-semibold transition-all duration-200 hover:scale-105 text-sm mx-auto"
+                          style={{ width: '500px' }}
+                        >
+                          {awardingPoints ? (
+                            <>
+                              <LoadingSpinner size="sm" />
+                              Awarding...
+                            </>
+                          ) : (
+                            "Award Points"
+                          )}
+                        </button>
+                      )}
                     </div>
                   </div>
                 );

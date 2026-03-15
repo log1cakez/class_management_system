@@ -267,17 +267,23 @@ function DashboardContent() {
                 <div className="mx-auto mb-4 flex items-center justify-center">
                   <Image
                     src={
-                      student.points >= 30
-                        ? DUCK_ICONS.DUCK_6
-                        : student.points >= 25
-                          ? DUCK_ICONS.DUCK_5
-                          : student.points >= 20
-                            ? DUCK_ICONS.DUCK_4
-                            : student.points >= 10
-                              ? DUCK_ICONS.DUCK_3
-                              : student.points >= 5
-                                ? DUCK_ICONS.DUCK_2
-                                : DUCK_ICONS.DUCK_1
+                      student.points >= 60
+                        ? DUCK_ICONS.DUCK_9
+                        : student.points >= 50
+                          ? DUCK_ICONS.DUCK_8
+                          : student.points >= 40
+                            ? DUCK_ICONS.DUCK_7
+                            : student.points >= 30
+                              ? DUCK_ICONS.DUCK_6
+                              : student.points >= 25
+                                ? DUCK_ICONS.DUCK_5
+                                : student.points >= 20
+                                  ? DUCK_ICONS.DUCK_4
+                                  : student.points >= 10
+                                    ? DUCK_ICONS.DUCK_3
+                                    : student.points >= 5
+                                      ? DUCK_ICONS.DUCK_2
+                                      : DUCK_ICONS.DUCK_1
                     }
                     alt={`duck level ${Math.floor(student.points / 5) + 1}`}
                     width={500}
@@ -464,11 +470,11 @@ function DashboardContent() {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-gray-800">Red Bow</h3>
-                    <p className="text-gray-600">Earn 5 points to unlock</p>
+                    <p className="text-gray-600">Earn 15 points to unlock</p>
                   </div>
                 </div>
                 <div className="bg-orange-400 px-4 py-2 rounded-full">
-                  <span className="text-white font-bold">5</span>
+                  <span className="text-white font-bold">15</span>
                 </div>
               </div>
 
@@ -480,11 +486,11 @@ function DashboardContent() {
                   </div>
                   <div>
                     <h3 className="text-xl font-bold text-gray-800">Watch</h3>
-                    <p className="text-gray-600">Earn 10 points to unlock</p>
+                    <p className="text-gray-600">Earn 20 points to unlock</p>
                   </div>
                 </div>
                 <div className="bg-orange-400 px-4 py-2 rounded-full">
-                  <span className="text-white font-bold">10</span>
+                  <span className="text-white font-bold">20</span>
                 </div>
               </div>
 
@@ -498,11 +504,11 @@ function DashboardContent() {
                     <h3 className="text-xl font-bold text-gray-800">
                       Black Hat
                     </h3>
-                    <p className="text-gray-600">Earn 20 points to unlock</p>
+                    <p className="text-gray-600">Earn 25 points to unlock</p>
                   </div>
                 </div>
                 <div className="bg-orange-400 px-4 py-2 rounded-full">
-                  <span className="text-white font-bold">20</span>
+                  <span className="text-white font-bold">25</span>
                 </div>
               </div>
 
@@ -516,11 +522,11 @@ function DashboardContent() {
                     <h3 className="text-xl font-bold text-gray-800">
                       Blue Necklace
                     </h3>
-                    <p className="text-gray-600">Earn 25 points to unlock</p>
+                    <p className="text-gray-600">Earn 30 points to unlock</p>
                   </div>
                 </div>
                 <div className="bg-orange-400 px-4 py-2 rounded-full">
-                  <span className="text-white font-bold">25</span>
+                  <span className="text-white font-bold">30</span>
                 </div>
               </div>
 
@@ -534,14 +540,63 @@ function DashboardContent() {
                     <h3 className="text-xl font-bold text-gray-800">
                       Round Glasses
                     </h3>
-                    <p className="text-gray-600">Earn 30 points to unlock</p>
+                    <p className="text-gray-600">Earn 35 points to unlock</p>
                   </div>
                 </div>
                 <div className="bg-orange-400 px-4 py-2 rounded-full">
-                  <span className="text-white font-bold">30</span>
+                  <span className="text-white font-bold">35</span>
+                </div>
+              </div>
+
+              {/* Row 6 - Clothes */}
+              <div className="flex items-center justify-between bg-white rounded-2xl p-6 shadow-lg border-2 border-yellow-200">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-indigo-400 rounded-full flex items-center justify-center border-2 border-indigo-500">
+                    <span className="text-white font-bold text-lg">👕</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800">Clothes</h3>
+                    <p className="text-gray-600">Earn 40 points to unlock</p>
+                  </div>
+                </div>
+                <div className="bg-orange-400 px-4 py-2 rounded-full">
+                  <span className="text-white font-bold">40</span>
+                </div>
+              </div>
+
+              {/* Row 7 - Shoes */}
+              <div className="flex items-center justify-between bg-white rounded-2xl p-6 shadow-lg border-2 border-yellow-200">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-amber-600 rounded-full flex items-center justify-center border-2 border-amber-700">
+                    <span className="text-white font-bold text-lg">👟</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800">Shoes</h3>
+                    <p className="text-gray-600">Earn 50 points to unlock</p>
+                  </div>
+                </div>
+                <div className="bg-orange-400 px-4 py-2 rounded-full">
+                  <span className="text-white font-bold">50</span>
+                </div>
+              </div>
+
+              {/* Row 8 - Wig */}
+              <div className="flex items-center justify-between bg-white rounded-2xl p-6 shadow-lg border-2 border-yellow-200">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 bg-purple-400 rounded-full flex items-center justify-center border-2 border-purple-500">
+                    <span className="text-white font-bold text-lg">💇</span>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-800">Wig</h3>
+                    <p className="text-gray-600">Earn 60 points to unlock</p>
+                  </div>
+                </div>
+                <div className="bg-orange-400 px-4 py-2 rounded-full">
+                  <span className="text-white font-bold">60</span>
                 </div>
               </div>
             </div>
+            
 
             {/* Close Button */}
             <div className="text-center mt-8">
