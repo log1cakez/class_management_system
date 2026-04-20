@@ -108,6 +108,7 @@ export default function GroupWorkDemo({
     }
   }, [groupWorks]);
 
+
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -368,9 +369,6 @@ export default function GroupWorkDemo({
                         }`}
                       >
                         {groupWork.name}
-                        <span className="text-xs text-gray-500 ml-2">
-                          ({new Date(groupWork.createdAt).toLocaleDateString()})
-                        </span>
                       </button>
                     ))}
                   </div>
